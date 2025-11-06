@@ -1,0 +1,366 @@
+{% comment %}
+  Tiger Prompts v8.0 — TPEM-1.1 Enhanced Implementation
+  
+  New Features:
+  - Tiered constraint system (Critical, Context-Specific, Language-Specific)
+  - Coding context panel (existing code, language selector, test options)
+  - AI Response Validator
+  - Live PQS indicator
+  - Context-aware enhancements
+{% endcomment %}
+
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+{{ 'tiger-prompts.css' | asset_url | stylesheet_tag }}
+{{ 'tiger-prompts.js' | asset_url | script_tag }}
+
+<section id="tiger-prompts" class="tp-app">
+  <div class="tp-layout">
+    
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="tp-sidebar" class="tp-sidebar">
+      
+      <!-- Sidebar Header -->
+      <div class="tp-sidebar-head">
+        <div class="tp-sidebar-brand">
+          <img 
+            id="tp-sidebar-logo" 
+            class="tp-sidebar-logo"
+            src="https://cdn.shopify.com/s/files/1/0705/7326/0982/files/ChatGPT_Image_Nov_5_2025_at_07_29_59_PM.png?v=1762399837"
+            alt="Tiger Prompts">
+          <span class="tp-sidebar-title">Tiger Prompts</span>
+        </div>
+        <button 
+          id="tp-sidebar-toggle" 
+          class="tp-iconbtn" 
+          title="Collapse sidebar">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      </div>
+      
+      <!-- TPEM Branding -->
+      <div class="tp-tpem-badge">
+        <div>⚡ TPEM-1.1</div>
+        <div class="tp-tpem-version">Tiered Constraints System</div>
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="tp-nav">
+        
+        <!-- Appearance -->
+        <div class="tp-nav-section">
+          <div class="tp-nav-title">Appearance</div>
+          <button id="tp-theme-toggle" class="tp-btn tp-btn--black">
+            <i class="fa-solid fa-moon"></i>
+            <span>Toggle Theme</span>
+          </button>
+        </div>
+        
+        <!-- Mode -->
+        <div class="tp-nav-section">
+          <div class="tp-nav-title">Enhancement Mode</div>
+          <button id="tp-mode-lite" class="tp-btn tp-btn--ghost active" data-mode="lite">
+            <i class="fa-solid fa-bolt"></i>
+            <span>TPEM-Lite</span>
+          </button>
+          <button id="tp-mode-pro" class="tp-btn tp-btn--ghost" data-mode="pro">
+            <i class="fa-solid fa-rocket"></i>
+            <span>TPEM-Pro</span>
+          </button>
+        </div>
+        
+        <!-- Settings -->
+        <div class="tp-nav-section">
+          <div class="tp-nav-title">Settings</div>
+          <button id="tp-explain-toggle" class="tp-btn tp-btn--ghost">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Explain Changes</span>
+          </button>
+          <button id="tp-pqs-toggle" class="tp-btn tp-btn--ghost">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Show PQS Score</span>
+          </button>
+        </div>
+        
+        <!-- Presets -->
+        <div class="tp-nav-section">
+          <div class="tp-nav-title">Quick Presets</div>
+          <div class="tp-preset-item" data-preset="code">
+            <div class="tp-preset-name"><i class="fa-solid fa-code"></i> Code Assistant</div>
+            <div class="tp-preset-desc">Software engineering tasks</div>
+          </div>
+          <div class="tp-preset-item" data-preset="copy">
+            <div class="tp-preset-name"><i class="fa-solid fa-pen-fancy"></i> Copywriting</div>
+            <div class="tp-preset-desc">Marketing & content</div>
+          </div>
+          <div class="tp-preset-item" data-preset="analyze">
+            <div class="tp-preset-name"><i class="fa-solid fa-magnifying-glass-chart"></i> Analysis</div>
+            <div class="tp-preset-desc">Deep reasoning tasks</div>
+          </div>
+        </div>
+        
+        <!-- Saved Prompts -->
+        <div class="tp-nav-section">
+          <div class="tp-nav-title">Saved Prompts</div>
+          <div id="tp-saved-list" class="tp-saved-list">
+            <div style="font-size: 11px; opacity: 0.5; padding: 8px;">No saved prompts yet</div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="tp-nav-section">
+          <div class="tp-nav-title">Actions</div>
+          <button id="tp-reset" class="tp-btn tp-btn--ghost">
+            <i class="fa-solid fa-rotate-right"></i>
+            <span>Reset</span>
+          </button>
+        </div>
+        
+        <!-- Support -->
+        <div class="tp-nav-section">
+          <div class="tp-nav-title">Support</div>
+          <a href="https://buymeacoffee.com/tigerprompts" 
+             target="_blank" 
+             class="tp-btn tp-btn--orange"
+             title="Tip What It's Worth">
+            <i class="fa-solid fa-mug-hot"></i>
+            <span>Tip What It's Worth</span>
+          </a>
+        </div>
+        
+      </nav>
+      
+      <!-- Collapse Tab -->
+      <button id="tp-collapse-tab" class="tp-collapse-tab" title="Expand sidebar">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      
+    </aside>
+    
+    <!-- ===== MAIN AREA ===== -->
+    <main class="tp-main">
+      <div class="tp-container">
+        
+        <!-- Logo -->
+        <div class="tp-logo-wrap">
+          <img 
+            id="tp-logo" 
+            class="tp-logo"
+            src="https://cdn.shopify.com/s/files/1/0705/7326/0982/files/ChatGPT_Image_Nov_5_2025_at_07_36_00_PM.png?v=1762400176"
+            alt="Tiger Prompts">
+        </div>
+        
+        <!-- Input Bar -->
+        <div class="tp-input-wrap">
+          <textarea 
+            id="tp-input" 
+            class="tp-input" 
+            placeholder="Enter your prompt... (Press Enter to enhance)"
+            rows="1"></textarea>
+          
+          <div class="tp-input-actions">
+            <button id="tp-mic" class="tp-mic" title="Voice Input (Coming Soon)">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+            
+            <button id="tp-send" class="tp-send" title="Enhance Prompt">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+          
+          <!-- Live PQS Indicator -->
+          <div id="tp-live-pqs" class="tp-live-pqs" style="display: none;">
+            PQS: --
+          </div>
+        </div>
+        
+        <!-- Coding Mode Toggle -->
+        <div id="tp-coding-mode" class="tp-coding-mode" title="Click to toggle Coding Mode">
+          <div class="tp-coding-toggle">
+            <div class="tp-coding-toggle-knob"></div>
+          </div>
+          <div class="tp-coding-label">
+            <div class="tp-coding-label-main">
+              <i class="fa-solid fa-code"></i>
+              <span>Coding Mode</span>
+            </div>
+            <div class="tp-coding-label-sub">
+              Tiered constraints for AI-assisted coding
+            </div>
+          </div>
+        </div>
+        
+        <!-- NEW: Coding Context Panel -->
+        <div id="tp-coding-context" class="tp-coding-context" style="display: none;">
+          <div class="tp-context-header">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Coding Context (Optional - for better results)</span>
+          </div>
+          
+          <div class="tp-context-body">
+            <div class="tp-context-row">
+              <label class="tp-context-checkbox">
+                <input type="checkbox" id="tp-ctx-existing" />
+                <span>I'm modifying existing code</span>
+              </label>
+            </div>
+            
+            <textarea 
+              id="tp-ctx-code" 
+              class="tp-context-textarea"
+              placeholder="Paste your existing code here... (helps AI match your style and avoid breaking changes)"
+              style="display: none;"
+              rows="6"></textarea>
+            
+            <div class="tp-context-row tp-context-grid">
+              <div class="tp-context-field">
+                <label>Language:</label>
+                <select id="tp-ctx-language" class="tp-context-select">
+                  <option value="">Auto-detect</option>
+                  <option value="javascript">JavaScript</option>
+                  <option value="react">React</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="python">Python</option>
+                  <option value="rust">Rust</option>
+                  <option value="go">Go</option>
+                </select>
+              </div>
+              
+              <div class="tp-context-field">
+                <label class="tp-context-checkbox">
+                  <input type="checkbox" id="tp-ctx-tests" />
+                  <span>Include test cases</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Message Thread -->
+        <div id="tp-thread" class="tp-thread"></div>
+        
+        <!-- NEW: AI Response Validator -->
+        <div class="tp-validator-section">
+          <div class="tp-validator-header">
+            <h3>
+              <i class="fa-solid fa-shield-check"></i>
+              AI Response Validator
+            </h3>
+            <p>Paste the code your AI generated to check for common issues (truncation, missing imports, etc.)</p>
+          </div>
+          
+          <textarea 
+            id="tp-validate-input" 
+            class="tp-validate-input"
+            placeholder="Paste the code Claude/ChatGPT gave you here..."
+            rows="10"></textarea>
+          
+          <button id="tp-validate-btn" class="tp-btn tp-btn--orange tp-validate-btn">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            Check Code Quality
+          </button>
+          
+          <div id="tp-validate-results" class="tp-validate-results" style="display: none;">
+            <!-- Validation results will appear here -->
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="tp-footer">
+          <div class="tp-footer-content">
+            <div id="tp-status-indicator" class="tp-status-indicator ready">
+              ✅ Ready
+            </div>
+            <div class="tp-footer-branding">
+              Powered by <a href="https://autophage.ai" target="_blank" rel="noopener">Autophage.ai</a>
+            </div>
+          </div>
+        </footer>
+        
+      </div>
+    </main>
+    
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Tiger Prompts",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Tiger Prompts v8.0 Settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "Enhanced with Tiered Constraints System and AI Response Validator"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Tiger Prompts",
+      "info": "Internal reference for section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "label": "Show Sidebar",
+      "default": true,
+      "info": "Display the sidebar with navigation controls"
+    },
+    {
+      "type": "checkbox",
+      "id": "dark_mode",
+      "label": "Enable Dark Mode by Default",
+      "default": false,
+      "info": "Start with dark theme enabled"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pqs",
+      "label": "Show PQS Scores by Default",
+      "default": true,
+      "info": "Display Prompt Quality Scores (TPEM-1.1)"
+    },
+    {
+      "type": "select",
+      "id": "default_mode",
+      "label": "Default Enhancement Mode",
+      "options": [
+        {
+          "value": "lite",
+          "label": "TPEM-Lite (Fast, Local)"
+        },
+        {
+          "value": "pro",
+          "label": "TPEM-Pro (Advanced)"
+        }
+      ],
+      "default": "lite",
+      "info": "Choose default TPEM mode"
+    },
+    {
+      "type": "header",
+      "content": "Branding"
+    },
+    {
+      "type": "image_picker",
+      "id": "main_logo",
+      "label": "Main Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "sidebar_logo",
+      "label": "Sidebar Logo"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tiger Prompts TPEM-1.1",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
