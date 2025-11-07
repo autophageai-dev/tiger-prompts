@@ -1,4 +1,4 @@
-/* Tiger Prompts v8.0 â€” TPEM-1.1 Enhanced with Tiered Constraints */
+/* Tiger Prompts v8.0 – TPEM-1.1 Enhanced with Tiered Constraints */
 (function() {
   'use strict';
   
@@ -72,13 +72,13 @@
       pqsToggle: $('tp-pqs-toggle'),
       savedList: $('tp-saved-list'),
       codingMode: $('tp-coding-mode'),
-      // New context elements
+      vibeMode: $('tp-vibe-mode'),
+      fileDefsInput: $('tp-file-defs'),
       codingContext: $('tp-coding-context'),
       ctxExisting: $('tp-ctx-existing'),
       ctxCode: $('tp-ctx-code'),
       ctxLanguage: $('tp-ctx-language'),
       ctxTests: $('tp-ctx-tests'),
-      // Validator elements
       validateInput: $('tp-validate-input'),
       validateBtn: $('tp-validate-btn'),
       validateResults: $('tp-validate-results')
@@ -94,11 +94,13 @@
     
     // State
     let state = {
-      mode: localStorage.getItem('tp-mode') || 'lite', // 'lite' or 'pro'
+      mode: localStorage.getItem('tp-mode') || 'lite',
       explainMode: localStorage.getItem('tp-explain') === 'true',
-      showPQS: localStorage.getItem('tp-show-pqs') !== 'false', // default true
+      showPQS: localStorage.getItem('tp-show-pqs') !== 'false',
       savedPrompts: JSON.parse(localStorage.getItem('tp-saved') || '[]'),
       codingMode: localStorage.getItem('tp-coding-mode') === 'true',
+      vibeMode: localStorage.getItem('tp-vibe-mode') === 'true',
+      fileDefinitions: localStorage.getItem('tp-file-defs') || '',
       codeContext: {
         existingCode: '',
         language: '',
@@ -108,11 +110,17 @@
     };
     
     // Initialize
-    updateStatus('ready', 'âœ… TPEM-1.1 Ready');
+    updateStatus('ready', '✅ TPEM-1.1 Ready');
     loadSavedPrompts();
     updateModeButtons();
     updateSettingButtons();
     updateCodingModeUI();
+    updateVibeModeUI();
+    
+    // Load file definitions
+    if (elements.fileDefsInput && state.fileDefinitions) {
+      elements.fileDefsInput.value = state.fileDefinitions;
+    }
     
     // === INPUT HANDLERS ===
     
@@ -120,8 +128,6 @@
     elements.input.addEventListener('input', () => {
       elements.input.style.height = 'auto';
       elements.input.style.height = Math.min(elements.input.scrollHeight, 200) + 'px';
-      
-      // Live PQS calculation
       updateLivePQS(elements.input.value);
     });
     
@@ -155,7 +161,6 @@
       localStorage.setItem('tp-dark-mode', document.body.classList.contains('tp-dark'));
     });
     
-    // Load saved theme
     if (localStorage.getItem('tp-dark-mode') === 'true') {
       document.body.classList.add('tp-dark');
     }
@@ -166,14 +171,14 @@
       state.mode = 'lite';
       localStorage.setItem('tp-mode', 'lite');
       updateModeButtons();
-      updateStatus('ready', 'âœ… TPEM-Lite Mode');
+      updateStatus('ready', '✅ TPEM-Lite Mode');
     });
     
     elements.modePro?.addEventListener('click', () => {
       state.mode = 'pro';
       localStorage.setItem('tp-mode', 'pro');
       updateModeButtons();
-      updateStatus('ready', 'âœ… TPEM-Pro Mode');
+      updateStatus('ready', '✅ TPEM-Pro Mode');
     });
     
     // === SETTINGS ===
@@ -197,19 +202,38 @@
       localStorage.setItem('tp-coding-mode', state.codingMode);
       updateCodingModeUI();
       
-      // Toggle context panel
       if (elements.codingContext) {
         elements.codingContext.style.display = state.codingMode ? 'block' : 'none';
       }
       
-      // Update input placeholder
       if (state.codingMode) {
         elements.input.placeholder = 'Enter your coding task... (Optimized for AI-assisted development)';
-        updateStatus('ready', 'ðŸ’» Coding Mode Active');
+        updateStatus('ready', '💻 Coding Mode Active');
       } else {
         elements.input.placeholder = 'Enter your prompt... (Press Enter to enhance)';
-        updateStatus('ready', 'âœ… TPEM-1.1 Ready');
+        updateStatus('ready', '✅ TPEM-1.1 Ready');
       }
+    });
+    
+    // === VIBE CODING MODE ===
+    
+    elements.vibeMode?.addEventListener('click', () => {
+      state.vibeMode = !state.vibeMode;
+      localStorage.setItem('tp-vibe-mode', state.vibeMode);
+      updateVibeModeUI();
+      
+      if (state.vibeMode) {
+        updateStatus('ready', '🐯 Vibe Coding Active');
+      } else {
+        updateStatus('ready', '✅ TPEM-1.1 Ready');
+      }
+    });
+    
+    // === FILE DEFINITIONS ===
+    
+    elements.fileDefsInput?.addEventListener('input', (e) => {
+      state.fileDefinitions = e.target.value;
+      localStorage.setItem('tp-file-defs', state.fileDefinitions);
     });
     
     // === CODING CONTEXT HANDLERS ===
@@ -226,7 +250,8 @@
     });
     
     elements.ctxLanguage?.addEventListener('change', (e) => {
-      state.codeContext.language = e.target.value;
+      const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
+      state.codeContext.language = selected.join(', ');
     });
     
     elements.ctxTests?.addEventListener('change', (e) => {
@@ -243,15 +268,14 @@
         return;
       }
       
-      updateStatus('processing', 'ðŸ” Validating AI Response...');
+      updateStatus('processing', '🔍 Validating AI Response...');
       
-      // Simulate processing
       await sleep(800);
       
       const validation = validateAIResponse(code);
       displayValidationResults(validation);
       
-      updateStatus('ready', 'âœ… Validation Complete');
+      updateStatus('ready', '✅ Validation Complete');
     });
     
     // === PRESETS ===
@@ -275,7 +299,7 @@
           elements.thread.innerHTML = '';
           elements.input.value = '';
           elements.input.style.height = 'auto';
-          updateStatus('ready', 'âœ… TPEM-1.1 Ready');
+          updateStatus('ready', '✅ TPEM-1.1 Ready');
         }
       }
     });
@@ -283,7 +307,7 @@
     // === MICROPHONE ===
     
     elements.micBtn?.addEventListener('click', () => {
-      alert('ðŸŽ¤ Voice input coming soon!');
+      alert('🎤 Voice input coming soon!');
     });
     
     // === MAIN ENHANCEMENT LOGIC ===
@@ -296,27 +320,38 @@
         return;
       }
       
-      // Update UI
       updateStatus('processing', state.mode === 'pro' 
-        ? 'ðŸš€ Running TPEM-Pro Deep Analysis...' 
-        : 'âš¡ Running TPEM-Lite Pipeline...');
+        ? '🚀 Running TPEM-Pro Deep Analysis...' 
+        : '⚡ Running TPEM-Lite Pipeline...');
       
-      // Create message element
       const msgContainer = createMessageContainer();
       elements.thread.appendChild(msgContainer);
       
-      // Clear input
       const originalPrompt = prompt;
       elements.input.value = '';
       elements.input.style.height = 'auto';
       elements.input.focus();
       
-      // Scroll
       scrollToBottom();
       
-      // PRO MODE: Show loading animation
+      // Show thinking animation (3 seconds)
+      const content = msgContainer.querySelector('.tp-msg-content');
+      content.innerHTML = '<div class="tp-thinking">Thinking<span class="tp-thinking-dots"></span></div>';
+      
+      // Animate dots
+      let dotCount = 0;
+      const dotsInterval = setInterval(() => {
+        const dotsEl = content.querySelector('.tp-thinking-dots');
+        if (dotsEl) {
+          dotCount = (dotCount + 1) % 4;
+          dotsEl.textContent = '.'.repeat(dotCount);
+        }
+      }, 300);
+      
+      await sleep(3000);
+      clearInterval(dotsInterval);
+      
       if (state.mode === 'pro') {
-        const content = msgContainer.querySelector('.tp-msg-content');
         content.innerHTML = `
           <div class="tp-loading">
             <div class="tp-loading-spinner"></div>
@@ -328,23 +363,15 @@
           </div>
         `;
         
-        // Wait 3 seconds for "deep thinking"
-        await sleep(3000);
-      } else {
-        // Lite mode: quick processing
-        await sleep(400);
+        await sleep(2000);
       }
       
-      // Run TPEM-1.1 pipeline
       const result = await enhancePromptTPEM(originalPrompt);
       
-      // Update message
       updateMessage(msgContainer, result);
       
-      // Update status
-      updateStatus('ready', 'âœ… Enhancement Complete');
+      updateStatus('ready', '✅ Enhancement Complete');
       
-      // Scroll
       scrollToBottom();
     }
     
@@ -353,30 +380,23 @@
     async function enhancePromptTPEM(rawPrompt) {
       console.log('[TPEM-1.1] Starting enhancement pipeline...');
       
-      // Stage 1: Classification
       const taskType = classifyTask(rawPrompt);
       console.log(`[TPEM-1.1] Classified as: ${taskType}`);
       
-      // Stage 2: Ambiguity Analysis
       const ambiguityScore = calculateAmbiguity(rawPrompt);
       console.log(`[TPEM-1.1] Ambiguity score: ${ambiguityScore.toFixed(2)}`);
       
-      // Stage 3: Scaffold Synthesis
       const scaffold = buildScaffold(rawPrompt, taskType, ambiguityScore);
       
-      // Stage 4: Context Synthesis (with coding context)
       const enhanced = synthesizeContext(scaffold, taskType, rawPrompt);
       
-      // Stage 5: Enhancement Engine (mode-dependent)
       const final = state.mode === 'pro' 
         ? applyProEnhancements(enhanced, taskType)
         : enhanced;
       
-      // Stage 6: Validation & Scoring
       const pqsBefore = calculatePQS(rawPrompt);
       const pqsAfter = calculatePQS(final);
       
-      // Generate explanation if enabled
       const explanation = state.explainMode 
         ? generateExplanation(rawPrompt, final, taskType, ambiguityScore, pqsBefore, pqsAfter)
         : null;
@@ -423,32 +443,26 @@
       let score = 0;
       const lower = prompt.toLowerCase();
       
-      // Missing audience
       if (!/(for|to|audience|users|readers|customers|people|team)/.test(lower)) {
         score += 0.1;
       }
       
-      // Missing format
       if (!/(format|structure|json|markdown|list|table|style|output)/.test(lower)) {
         score += 0.1;
       }
       
-      // Vague verbs without metrics
       if (/(improve|better|optimize|enhance|fix|good)/.test(lower) && !/\d+/.test(prompt)) {
         score += 0.2;
       }
       
-      // No constraints
       if (!/(must|should|tone|style|length|words|characters|require|need)/.test(lower)) {
         score += 0.1;
       }
       
-      // Very short prompt
       if (prompt.split(' ').length < 5) {
         score += 0.15;
       }
       
-      // No context
       if (!/(about|regarding|for|on|with|using|that|which)/.test(lower)) {
         score += 0.15;
       }
@@ -474,24 +488,76 @@
     function synthesizeContext(scaffold, taskType, rawPrompt) {
       const sections = [];
       
-      // Header
+      // If Vibe Mode is active, inject the directive
+      if (state.vibeMode && state.codingMode) {
+        sections.push('# VIBE CODING DIRECTIVE');
+        sections.push('');
+        sections.push('## Core Behavior');
+        sections.push('- Roleplay as a senior full-stack engineer with decades of experience');
+        sections.push('- **Never truncate code** - provide every single line');
+        sections.push('- Never alter visual style, layout structure, or spacing without explicit instruction');
+        sections.push('- Preserve all existing colors, fonts, and design elements');
+        sections.push('- Make only surgical edits - fix or enhance what\'s broken, never rebuild from scratch');
+        sections.push('- Do not rewrite logic, reorganize code, or add frameworks unless explicitly directed');
+        sections.push('- No confirmation or double-checking questions - execute decisively');
+        sections.push('- Output clean final code only - no summaries, no readmes, no installation guides');
+        sections.push('- Never rename files - maintain all filenames exactly as specified');
+        sections.push('- Ensure deterministic behavior - identical prompts must produce identical output');
+        sections.push('');
+        
+        // Add file definitions if provided
+        if (state.fileDefinitions.trim()) {
+          sections.push('## File Definitions');
+          sections.push('**CRITICAL: Never change these filenames:**');
+          const files = state.fileDefinitions.split(',').map(f => f.trim()).filter(f => f);
+          files.forEach(file => {
+            sections.push(`- \`${file}\` - maintain this exact filename`);
+          });
+          sections.push('');
+        }
+        
+        sections.push('## Task');
+        sections.push(scaffold.prompt);
+        sections.push('');
+        
+        if (state.codeContext.existingCode) {
+          sections.push('## Existing Code Context');
+          sections.push('```');
+          sections.push(state.codeContext.existingCode);
+          sections.push('```');
+          sections.push('**CRITICAL:** Study the code above. Match its style, patterns, and conventions exactly.');
+          sections.push('');
+        }
+        
+        return sections.join('\n');
+      }
+      
+      // Standard TPEM enhancement
       sections.push('# ENHANCED PROMPT (TPEM-1.1)');
       if (state.codingMode) {
-        sections.push('**ðŸš€ CODING MODE ACTIVE** - Optimized for AI-Assisted Development');
+        sections.push('**🚀 CODING MODE ACTIVE** - Optimized for AI-Assisted Development');
       }
       sections.push('');
       
-      // Role & Context
       sections.push('## Role & Context');
       sections.push(getRoleForTask(taskType));
       sections.push('');
       
-      // Task
       sections.push('## Task');
       sections.push(scaffold.prompt);
       sections.push('');
       
-      // Add existing code context if provided
+      // Add file definitions if provided
+      if (state.fileDefinitions.trim() && state.codingMode) {
+        sections.push('## File Definitions');
+        sections.push('**Never change these filenames:**');
+        const files = state.fileDefinitions.split(',').map(f => f.trim()).filter(f => f);
+        files.forEach(file => {
+          sections.push(`- \`${file}\``);
+        });
+        sections.push('');
+      }
+      
       if (state.codeContext.existingCode) {
         sections.push('## Existing Code Context');
         sections.push('```');
@@ -502,12 +568,10 @@
         sections.push('');
       }
       
-      // Constraints
       sections.push('## Constraints');
       sections.push(...getConstraintsForTask(taskType));
       sections.push('');
       
-      // Add tiered coding constraints if coding mode is active
       if (state.codingMode) {
         const context = {
           hasExistingCode: !!state.codeContext.existingCode,
@@ -521,17 +585,14 @@
         sections.push('');
       }
       
-      // Process
       sections.push('## Process');
       sections.push(...getProcessForTask(taskType));
       sections.push('');
       
-      // Output Format
       sections.push('## Output Format');
       sections.push(...getOutputForTask(taskType));
       sections.push('');
       
-      // Quality Bar
       sections.push('## Quality Bar');
       sections.push('- Meets all specified constraints');
       sections.push('- Clear, unambiguous, and directly usable');
@@ -549,7 +610,6 @@
       }
       sections.push('');
       
-      // Assumptions (if high ambiguity)
       if (scaffold.needsAssumptions) {
         sections.push('## Assumptions');
         sections.push('*Due to prompt ambiguity, the following assumptions were made:*');
@@ -568,35 +628,26 @@
     function getCodingModeConstraints(context = {}) {
       const constraints = [];
       
-      // === TIER 1: CRITICAL (Always) ===
       constraints.push(...getCriticalRules());
       
-      // === TIER 2: CONTEXT-SPECIFIC ===
-      
-      // If user pasted existing code
       if (context.hasExistingCode) {
         constraints.push(...getChangeManagementRules());
       }
       
-      // If user is building something new
       if (context.isNewFeature) {
         constraints.push(...getArchitectureRules());
       }
       
-      // If user wants tests
       if (context.needsTesting || /test|spec|jest|pytest|unittest/i.test(context.prompt)) {
         constraints.push(...getTestingRules());
       }
-      
-      // === TIER 3: LANGUAGE-SPECIFIC ===
       
       if (context.language) {
         constraints.push(...getLanguageSpecificRules(context.language));
       }
       
-      // === UNIVERSAL QUALITY CHECKLIST ===
       constraints.push('',
-        '## âœ¨ CODE QUALITY CHECKLIST',
+        '## ✨ CODE QUALITY CHECKLIST',
         '',
         '**Before responding, verify:**',
         '- [ ] Code is complete (no truncation/placeholders)',
@@ -613,205 +664,79 @@
       return constraints;
     }
     
-    // === TIER 1: CRITICAL RULES ===
-    
     function getCriticalRules() {
       return [
-        '## ðŸš¨ CRITICAL REQUIREMENTS (NON-NEGOTIABLE)',
+        '## 🚨 CRITICAL REQUIREMENTS (NON-NEGOTIABLE)',
         '',
         '### 1. Complete Code - Zero Truncation',
         '**NEVER use placeholders like:**',
-        '   âŒ `// ... rest of code here`',
-        '   âŒ `// continuing from above`',
-        '   âŒ `// same as before`',
-        '   âŒ `// you know what goes here`',
+        '   ❌ `// ... rest of code here`',
+        '   ❌ `// continuing from above`',
+        '   ❌ `// same as before`',
         '',
         '**ALWAYS provide:**',
-        '   âœ… Every single line of code needed',
-        '   âœ… All imports and dependencies at the top',
-        '   âœ… Complete function bodies (no stubs)',
-        '   âœ… Full file from start to finish',
-        '',
-        '**Example of WRONG:**',
-        '```javascript',
-        'function processData(data) {',
-        '  // validate data',
-        '  // ... rest of validation  â† âŒ TRUNCATED',
-        '  return result;',
-        '}',
-        '```',
-        '',
-        '**Example of RIGHT:**',
-        '```javascript',
-        'function processData(data) {',
-        '  // Validate data is not null/undefined',
-        '  if (!data) {',
-        '    throw new Error("Data cannot be null");',
-        '  }',
-        '  ',
-        '  // Validate data structure',
-        '  if (!data.id || !data.name) {',
-        '    throw new Error("Data must have id and name");',
-        '  }',
-        '  ',
-        '  // Process the data',
-        '  const result = {',
-        '    id: data.id,',
-        '    name: data.name.trim(),',
-        '    processed: true',
-        '  };',
-        '  ',
-        '  return result;',
-        '}',
-        '```',
+        '   ✅ Every single line of code needed',
+        '   ✅ All imports and dependencies at the top',
+        '   ✅ Complete function bodies (no stubs)',
+        '   ✅ Full file from start to finish',
         '',
         '### 2. Radical Transparency',
         '**If you cannot do something, say so immediately:**',
-        '   âœ… "I cannot access external APIs, so I\'ll show you the structure"',
-        '   âœ… "This requires testing in a browser - here\'s how to test it"',
-        '   âœ… "I\'m not certain about X - check the docs at [link]"',
-        '   âŒ [Never guess or hallucinate libraries/APIs that don\'t exist]',
-        '',
-        '**Always flag assumptions:**',
-        '   Example: "I\'m assuming you\'re using React 18+. If using an older version, change X to Y."',
+        '   ✅ "I cannot access external APIs, so I\'ll show you the structure"',
+        '   ✅ "This requires testing in a browser - here\'s how to test it"',
+        '   ✅ "I\'m not certain about X - check the docs at [link]"',
         '',
         '### 3. Explicit Change Communication',
         '**For every code change, explain:**',
         '   1. WHAT you changed (specific lines/functions)',
         '   2. WHY you changed it (what problem it solves)',
         '   3. IMPACT (what might break, what to test)',
-        '',
-        '**Example:**',
-        '```javascript',
-        '// CHANGED: Line 42-45',
-        '// WHY: Previous validation only checked for null, now also checks empty string',
-        '// IMPACT: More strict - may reject previously accepted inputs',
-        'if (!email || email.trim() === "") {',
-        '  throw new Error("Email is required");',
-        '}',
-        '```',
         ''
       ];
     }
     
-    // === TIER 2: CHANGE MANAGEMENT RULES ===
-    
     function getChangeManagementRules() {
       return [
-        '## ðŸ”§ CHANGE MANAGEMENT (Modifying Existing Code)',
+        '## 🔧 CHANGE MANAGEMENT (Modifying Existing Code)',
         '',
         '### Gold Standard Reference',
         '**Before making ANY changes:**',
         '   1. Study the existing code patterns',
-        '   2. Match naming conventions exactly (camelCase vs snake_case)',
+        '   2. Match naming conventions exactly',
         '   3. Preserve the same indentation/spacing style',
         '   4. Keep the same comment style',
         '',
         '### Surgical Precision',
         '**ONLY modify what was explicitly requested:**',
-        '   âŒ Do NOT "improve" working code',
-        '   âŒ Do NOT refactor unrelated functions',
-        '   âŒ Do NOT rename variables "to be clearer"',
-        '   âŒ Do NOT change formatting/style of unchanged code',
-        '',
-        '**If you see something that could be better, ASK first:**',
-        '   âœ… "I notice X could be improved by Y. Would you like me to change it?"',
-        '   âŒ [Don\'t just change it and explain why afterward]',
-        '',
-        '### Change Tracking',
-        '**Use clear markers:**',
-        '```javascript',
-        '// === MODIFIED: User Authentication ===',
-        '// OLD: Used localStorage for tokens',
-        '// NEW: Using httpOnly cookies for security',
-        '// REASON: localStorage is vulnerable to XSS attacks',
-        '',
-        'function authenticateUser(credentials) {',
-        '  // ... new implementation',
-        '}',
-        '// === END MODIFICATION ===',
-        '```',
+        '   ❌ Do NOT "improve" working code',
+        '   ❌ Do NOT refactor unrelated functions',
+        '   ❌ Do NOT rename variables',
+        '   ❌ Do NOT change formatting/style of unchanged code',
         ''
       ];
     }
     
-    // === TIER 2: ARCHITECTURE RULES ===
-    
     function getArchitectureRules() {
       return [
-        '## ðŸ—ï¸ ARCHITECTURE (New Features/Components)',
+        '## 🏗️ ARCHITECTURE (New Features/Components)',
         '',
         '### Modularity Principles',
         '**Single Responsibility:**',
         '   Each function/component should do ONE thing',
-        '   Example: Don\'t mix data fetching + rendering + validation in one function',
-        '',
-        '**Example of BAD (mixed responsibilities):**',
-        '```javascript',
-        'function UserProfile() {',
-        '  const [user, setUser] = useState(null);',
-        '  ',
-        '  // Fetching + validation + rendering all in one',
-        '  useEffect(() => {',
-        '    fetch("/api/user")',
-        '      .then(res => res.json())',
-        '      .then(data => {',
-        '        if (data.email && data.email.includes("@")) {',
-        '          setUser(data);',
-        '        }',
-        '      });',
-        '  }, []);',
-        '  ',
-        '  return <div>{user?.name}</div>;',
-        '}',
-        '```',
-        '',
-        '**Example of GOOD (separated responsibilities):**',
-        '```javascript',
-        '// 1. Data fetching (custom hook)',
-        'function useUser() {',
-        '  const [user, setUser] = useState(null);',
-        '  ',
-        '  useEffect(() => {',
-        '    fetchUser().then(setUser);',
-        '  }, []);',
-        '  ',
-        '  return user;',
-        '}',
-        '',
-        '// 2. Validation (pure function)',
-        'function validateUser(user) {',
-        '  return user?.email?.includes("@");',
-        '}',
-        '',
-        '// 3. Presentation (component)',
-        'function UserProfile() {',
-        '  const user = useUser();',
-        '  ',
-        '  if (!user || !validateUser(user)) {',
-        '    return <div>Invalid user</div>;',
-        '  }',
-        '  ',
-        '  return <div>{user.name}</div>;',
-        '}',
-        '```',
         '',
         '### Separation of Concerns',
         '**Organize code into clear layers:**',
-        '   ðŸ“ `/api` - Data fetching logic',
-        '   ðŸ“ `/components` - UI components (presentation only)',
-        '   ðŸ“ `/hooks` - Reusable stateful logic',
-        '   ðŸ“ `/utils` - Pure utility functions',
-        '   ðŸ“ `/types` - TypeScript interfaces/types',
+        '   📁 `/api` - Data fetching logic',
+        '   📁 `/components` - UI components',
+        '   📁 `/hooks` - Reusable stateful logic',
+        '   📁 `/utils` - Pure utility functions',
         ''
       ];
     }
     
-    // === TIER 2: TESTING RULES ===
-    
     function getTestingRules() {
       return [
-        '## ðŸ§ª TESTING REQUIREMENTS',
+        '## 🧪 TESTING REQUIREMENTS',
         '',
         '### Test Cases Format',
         '**For each function, provide:**',
@@ -819,112 +744,52 @@
         '// Test Case 1: Happy path',
         'Input: { id: 1, name: "John" }',
         'Expected: { id: 1, name: "John", processed: true }',
-        '',
-        '// Test Case 2: Edge case (empty data)',
-        'Input: {}',
-        'Expected: Error("Data must have id and name")',
-        '',
-        '// Test Case 3: Edge case (null)',
-        'Input: null',
-        'Expected: Error("Data cannot be null")',
-        '```',
-        '',
-        '### Unit Test Example',
-        '**Include runnable tests:**',
-        '```javascript',
-        'describe("processData", () => {',
-        '  it("should process valid data", () => {',
-        '    const input = { id: 1, name: "John" };',
-        '    const result = processData(input);',
-        '    expect(result.processed).toBe(true);',
-        '  });',
-        '  ',
-        '  it("should throw error for null data", () => {',
-        '    expect(() => processData(null))',
-        '      .toThrow("Data cannot be null");',
-        '  });',
-        '});',
         '```',
         ''
       ];
     }
     
-    // === TIER 3: LANGUAGE-SPECIFIC RULES ===
-    
     function getLanguageSpecificRules(language) {
       const rules = {
         'javascript': [
           '',
-          '## ðŸ“˜ JAVASCRIPT BEST PRACTICES',
+          '## 📘 JAVASCRIPT BEST PRACTICES',
           '- Use `const` by default, `let` only when reassigning',
           '- Prefer arrow functions for callbacks',
           '- Use destructuring: `const { name, age } = user`',
-          '- Use optional chaining: `user?.address?.city`',
-          '- Use nullish coalescing: `value ?? defaultValue`',
-          '- Always handle Promise rejections with `.catch()` or try/catch',
+          '- Always handle Promise rejections',
           ''
         ],
         'react': [
           '',
-          '## âš›ï¸ REACT BEST PRACTICES',
-          '- Imports order: React, then libraries, then local',
-          '- Use functional components + hooks (not class components)',
-          '- Destructure props: `function Button({ onClick, label }) {}`',
-          '- Use `key` prop in lists: `{items.map(item => <div key={item.id}>)}`',
-          '- Memoize expensive calculations: `useMemo(() => compute(data), [data])`',
-          '- Extract repeated JSX into components',
+          '## ⚛️ REACT BEST PRACTICES',
+          '- Use functional components + hooks',
+          '- Destructure props',
+          '- Use `key` prop in lists',
+          '- Memoize expensive calculations',
           ''
         ],
         'typescript': [
           '',
-          '## ðŸ“˜ TYPESCRIPT BEST PRACTICES',
+          '## 📘 TYPESCRIPT BEST PRACTICES',
           '- Define interfaces for all data structures',
-          '- Use union types: `string | number`',
-          '- Use type guards for narrowing: `if (typeof x === "string")`',
-          '- Avoid `any` - use `unknown` if type is truly unknown',
-          '- Use `Readonly<T>` for immutable data',
-          '- Export types with the code that uses them',
+          '- Use union types',
+          '- Avoid `any`',
           ''
         ],
         'python': [
           '',
-          '## ðŸ PYTHON BEST PRACTICES',
-          '- Follow PEP 8: snake_case for functions, UPPER_CASE for constants',
-          '- Use type hints: `def process(data: dict) -> list:`',
-          '- Use list comprehensions: `[x*2 for x in numbers if x > 0]`',
-          '- Context managers for resources: `with open("file.txt") as f:`',
-          '- Use f-strings: `f"Hello {name}"`',
-          '- Docstrings for all public functions',
-          ''
-        ],
-        'rust': [
-          '',
-          '## ðŸ¦€ RUST BEST PRACTICES',
-          '- Use `Result<T, E>` for error handling',
-          '- Leverage the borrow checker - avoid unnecessary clones',
-          '- Use iterators over loops when possible',
-          '- Pattern matching with `match` is preferred',
-          '- Use `Option<T>` instead of null',
-          '- Add `#[derive(Debug)]` to structs',
-          ''
-        ],
-        'go': [
-          '',
-          '## ðŸ¹ GO BEST PRACTICES',
-          '- Check errors immediately: `if err != nil { return err }`',
-          '- Use defer for cleanup: `defer file.Close()`',
-          '- Goroutines for concurrency, not parallelism',
-          '- Use context for cancellation',
-          '- Interfaces are implicit - define small ones',
-          '- Use `gofmt` formatting',
+          '## 🐍 PYTHON BEST PRACTICES',
+          '- Follow PEP 8',
+          '- Use type hints',
+          '- Use list comprehensions',
+          '- Context managers for resources',
           ''
         ]
       };
       
       return rules[language] || [];
     }
-    
-    // === LANGUAGE DETECTION ===
     
     function detectLanguage(prompt) {
       const lower = prompt.toLowerCase();
@@ -933,25 +798,18 @@
       if (/\btypescript\b|\.tsx?\b/i.test(lower)) return 'typescript';
       if (/\bpython\b|\.py\b/i.test(lower)) return 'python';
       if (/\bjavascript\b|\.jsx?\b|node\.?js/i.test(lower)) return 'javascript';
-      if (/\brust\b|\.rs\b/i.test(lower)) return 'rust';
-      if (/\bgo\b|golang/i.test(lower)) return 'go';
       
       return null;
     }
     
-    // === VALIDATION SYSTEM ===
-    
     function validateAIResponse(code) {
       const issues = [];
       
-      // Check 1: Truncation patterns
       const truncationPatterns = [
         { pattern: /\/\/\s*\.\.\./, message: 'Ellipsis placeholder found' },
         { pattern: /\/\/\s*rest of/i, message: 'Truncation comment found' },
         { pattern: /\/\/\s*continued/i, message: 'Continuation placeholder found' },
-        { pattern: /\/\/\s*same as (above|before)/i, message: 'Reference to previous code' },
-        { pattern: /#\s*\.\.\./, message: 'Python ellipsis placeholder' },
-        { pattern: /\.\.\.\s*$/m, message: 'Trailing ellipsis' }
+        { pattern: /\/\/\s*same as (above|before)/i, message: 'Reference to previous code' }
       ];
       
       truncationPatterns.forEach(({ pattern, message }) => {
@@ -967,8 +825,7 @@
         }
       });
       
-      // Check 2: Missing imports (JavaScript/TypeScript/React)
-      if (/\b(useState|useEffect|useContext|useReducer|useMemo|useCallback)\b/.test(code) && 
+      if (/\b(useState|useEffect|useContext)\b/.test(code) && 
           !/import\s+.*\s+from\s+['"]react['"]/.test(code)) {
         issues.push({
           type: 'CRITICAL',
@@ -978,24 +835,6 @@
         });
       }
       
-      // Check 3: Undefined functions
-      const functionCalls = extractFunctionCalls(code);
-      const functionDefinitions = extractFunctionDefinitions(code);
-      const undefinedFunctions = functionCalls.filter(call => 
-        !functionDefinitions.includes(call) && 
-        !isBuiltInFunction(call)
-      );
-      
-      if (undefinedFunctions.length > 0) {
-        issues.push({
-          type: 'CRITICAL',
-          category: 'Undefined Functions',
-          problem: `Functions called but not defined: ${undefinedFunctions.slice(0, 3).join(', ')}`,
-          fix: 'Ask AI to define these functions or import them from the correct modules'
-        });
-      }
-      
-      // Check 4: Error handling
       const hasAsyncCode = /async\s+function|\.then\(|await\s/.test(code);
       const hasErrorHandling = /try\s*{|\.catch\(|catch\s*\(/i.test(code);
       
@@ -1008,33 +847,10 @@
         });
       }
       
-      // Check 5: Console.logs (shouldn't be in production)
-      const consoleCount = (code.match(/console\.(log|warn|error)/g) || []).length;
-      if (consoleCount > 3) {
-        issues.push({
-          type: 'WARNING',
-          category: 'Debugging Code',
-          problem: `${consoleCount} console statements found - may be debug code`,
-          fix: 'Remove console.logs or replace with proper logging'
-        });
-      }
-      
-      // Check 6: TODOs or FIXMEs
-      if (/TODO|FIXME|HACK|XXX/i.test(code)) {
-        issues.push({
-          type: 'WARNING',
-          category: 'Incomplete Code',
-          problem: 'TODO/FIXME comments found - code may be incomplete',
-          fix: 'Ask AI to complete the implementation'
-        });
-      }
-      
-      // Calculate quality score
       const criticalCount = issues.filter(i => i.type === 'CRITICAL').length;
       const warningCount = issues.filter(i => i.type === 'WARNING').length;
       const score = Math.max(0, 100 - (criticalCount * 30) - (warningCount * 10));
       
-      // Generate follow-up prompt
       const followUpPrompt = generateFollowUpPrompt(issues);
       
       return {
@@ -1050,51 +866,6 @@
       };
     }
     
-    function extractFunctionCalls(code) {
-      // Simple extraction - matches word followed by (
-      const matches = code.match(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g);
-      if (!matches) return [];
-      
-      return [...new Set(matches.map(m => m.replace(/\s*\($/, '')))];
-    }
-    
-    function extractFunctionDefinitions(code) {
-      const patterns = [
-        /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g,  // function declarations
-        /const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g,  // const declarations
-        /let\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g,    // let declarations
-        /def\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g         // Python def
-      ];
-      
-      const definitions = [];
-      patterns.forEach(pattern => {
-        let match;
-        while ((match = pattern.exec(code)) !== null) {
-          definitions.push(match[1]);
-        }
-      });
-      
-      return [...new Set(definitions)];
-    }
-    
-    function isBuiltInFunction(name) {
-      const builtIns = [
-        // JavaScript
-        'console', 'fetch', 'setTimeout', 'setInterval', 'Promise', 'Array', 'Object',
-        'Math', 'Date', 'JSON', 'parseInt', 'parseFloat', 'isNaN', 'alert', 'confirm',
-        // React
-        'useState', 'useEffect', 'useContext', 'useReducer', 'useMemo', 'useCallback',
-        'useRef', 'useLayoutEffect', 'useImperativeHandle', 'useDebugValue',
-        // Common libraries
-        'require', 'module', 'exports', 'process', 'Buffer',
-        // Python
-        'print', 'len', 'range', 'str', 'int', 'float', 'list', 'dict', 'set',
-        'open', 'input', 'map', 'filter', 'zip', 'enumerate'
-      ];
-      
-      return builtIns.includes(name);
-    }
-    
     function generateFollowUpPrompt(issues) {
       if (issues.length === 0) {
         return null;
@@ -1106,7 +877,7 @@
       let prompt = '## Issues Found in Your Code\n\n';
       
       if (critical.length > 0) {
-        prompt += '### ðŸš¨ CRITICAL ISSUES (Must Fix):\n\n';
+        prompt += '### 🚨 CRITICAL ISSUES (Must Fix):\n\n';
         critical.forEach((issue, i) => {
           prompt += `${i + 1}. **${issue.category}:** ${issue.problem}\n`;
           prompt += `   - Fix: ${issue.fix}\n\n`;
@@ -1114,7 +885,7 @@
       }
       
       if (warnings.length > 0) {
-        prompt += '### âš ï¸ WARNINGS (Should Fix):\n\n';
+        prompt += '### ⚠️ WARNINGS (Should Fix):\n\n';
         warnings.forEach((issue, i) => {
           prompt += `${i + 1}. **${issue.category}:** ${issue.problem}\n`;
           prompt += `   - Suggestion: ${issue.fix}\n\n`;
@@ -1131,12 +902,6 @@
       });
       
       prompt += '\nPlease provide the COMPLETE, working code with ALL critical issues fixed.\n';
-      prompt += 'Requirements:\n';
-      prompt += '- NO truncation or placeholders (no // ... comments)\n';
-      prompt += '- ALL imports included at the top\n';
-      prompt += '- ALL functions fully defined\n';
-      prompt += '- Proper error handling\n';
-      prompt += '- Code should be copy-paste ready\n';
       prompt += '```';
       
       return prompt;
@@ -1190,7 +955,7 @@
                   <strong>${issue.category}</strong>
                 </div>
                 <div class="tp-validate-issue-problem">${issue.problem}</div>
-                <div class="tp-validate-issue-fix">ðŸ’¡ ${issue.fix}</div>
+                <div class="tp-validate-issue-fix">💡 ${issue.fix}</div>
               </div>
             `;
           });
@@ -1207,7 +972,7 @@
                   <strong>${issue.category}</strong>
                 </div>
                 <div class="tp-validate-issue-problem">${issue.problem}</div>
-                <div class="tp-validate-issue-fix">ðŸ’¡ ${issue.fix}</div>
+                <div class="tp-validate-issue-fix">💡 ${issue.fix}</div>
               </div>
             `;
           });
@@ -1234,8 +999,6 @@
       results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     
-    // === LIVE PQS INDICATOR ===
-    
     function updateLivePQS(prompt) {
       const livePQS = $('tp-live-pqs');
       if (!livePQS || !prompt) return;
@@ -1251,46 +1014,37 @@
       livePQS.style.display = 'block';
     }
     
-    // === STAGE 5: PRO ENHANCEMENTS ===
-    
     function applyProEnhancements(enhanced, taskType) {
-      // TPEM-Pro adds significantly more depth
       let sections = [];
       
-      // Parse existing sections
       const existingSections = enhanced.split('\n## ');
-      sections.push(existingSections[0]); // Keep header
+      sections.push(existingSections[0]);
       
       for (let i = 1; i < existingSections.length; i++) {
         const section = existingSections[i];
         
-        // Massively expand Process section
         if (section.startsWith('Process')) {
           sections.push('Process\n' + 
             expandProcessStepsPro(taskType) + '\n\n' +
             '### Checkpoint Questions:\n' +
             getCheckpointQuestions(taskType).join('\n'));
         }
-        // Add huge Examples section before Quality Bar
         else if (section.startsWith('Quality Bar')) {
           sections.push('Examples & Test Cases\n' + 
             getDetailedExamplesPro(taskType).join('\n\n'));
           sections.push(section);
         }
-        // Expand Constraints dramatically
         else if (section.startsWith('Constraints')) {
           sections.push('Constraints\n' + 
             getExpandedConstraintsPro(taskType).join('\n') + '\n\n' +
             '### Additional Considerations:\n' +
             getAdditionalConsiderations(taskType).join('\n'));
         }
-        // Keep other sections
         else {
           sections.push(section);
         }
       }
       
-      // Add PRO-only sections
       const qualityIndex = sections.findIndex(s => s.startsWith('Quality Bar'));
       if (qualityIndex > 0) {
         sections.splice(qualityIndex + 1, 0, 
@@ -1302,39 +1056,23 @@
       return sections.join('\n## ');
     }
     
-    // PRO MODE HELPERS
-    
     function expandProcessStepsPro(type) {
       const base = [
         '**Stage 1: Preparation & Analysis**',
         '- Thoroughly analyze the request',
         '- Identify all explicit and implicit requirements',
-        '- Research context and domain if needed',
-        '- List assumptions that need validation',
         '',
         '**Stage 2: Strategic Planning**',
         '- Break down into logical sub-tasks',
         '- Determine optimal approach/methodology',
-        '- Identify potential challenges and solutions',
-        '- Establish success criteria',
         '',
         '**Stage 3: Execution**',
         '- Follow systematic implementation process',
         '- Maintain quality standards throughout',
-        '- Document decisions and rationale',
-        '- Build in checkpoints for validation',
         '',
         '**Stage 4: Review & Refinement**',
         '- Cross-check against requirements',
-        '- Test/validate all components',
-        '- Refine and optimize output',
-        '- Verify completeness and accuracy',
-        '',
-        '**Stage 5: Finalization**',
-        '- Conduct comprehensive quality check',
-        '- Ensure all criteria are met',
-        '- Add final polish and formatting',
-        '- Prepare supporting documentation'
+        '- Test/validate all components'
       ];
       return base.join('\n');
     }
@@ -1344,8 +1082,7 @@
         '- [ ] Have all requirements been addressed?',
         '- [ ] Is the output clear and unambiguous?',
         '- [ ] Have edge cases been considered?',
-        '- [ ] Is the quality bar met?',
-        '- [ ] Would this pass peer review?'
+        '- [ ] Is the quality bar met?'
       ];
     }
     
@@ -1353,28 +1090,8 @@
       const examples = [
         '### Example 1: Optimal Input/Output Pattern',
         '```',
-        'INPUT:',
-        '[Detailed example of ideal input format]',
-        '',
-        'PROCESS:',
-        '1. [First transformation step]',
-        '2. [Second transformation step]',
-        '3. [Third transformation step]',
-        '',
-        'OUTPUT:',
-        '[Expected output format with all requirements met]',
-        '```',
-        '',
-        '### Example 2: Edge Case Handling',
-        '```',
-        'SCENARIO: [Describe unusual or boundary condition]',
-        '',
-        'APPROACH:',
-        '- First, identify the edge case characteristics',
-        '- Then, apply appropriate handling strategy',
-        '- Finally, validate the output meets standards',
-        '',
-        'RESULT: [How the edge case should be handled]',
+        'INPUT: [Detailed example of ideal input format]',
+        'OUTPUT: [Expected output format with all requirements met]',
         '```'
       ];
       return examples;
@@ -1385,14 +1102,7 @@
         '**Primary Requirements:**',
         '- Accuracy: All information must be factually correct',
         '- Completeness: Address all aspects of the request',
-        '- Clarity: Use clear, unambiguous language',
-        '- Structure: Follow logical organization',
-        '',
-        '**Quality Standards:**',
-        '- Professional tone and presentation',
-        '- Proper formatting and structure',
-        '- Consistent terminology throughout',
-        '- No assumptions without explicit statement'
+        '- Clarity: Use clear, unambiguous language'
       ];
     }
     
@@ -1400,9 +1110,7 @@
       return [
         '- Consider performance implications at scale',
         '- Think about future extensibility needs',
-        '- Account for different user skill levels',
-        '- Plan for edge cases and error scenarios',
-        '- Document assumptions and limitations clearly'
+        '- Account for different user skill levels'
       ];
     }
     
@@ -1413,28 +1121,20 @@
         '**Completeness Check:**',
         '- [ ] All requirements addressed',
         '- [ ] No missing information',
-        '- [ ] Edge cases considered',
-        '- [ ] Examples included where helpful',
         '',
         '**Quality Check:**',
         '- [ ] Clear and unambiguous language',
-        '- [ ] Proper structure and formatting',
-        '- [ ] Consistent terminology',
-        '- [ ] No errors or typos'
+        '- [ ] Proper structure and formatting'
       ];
     }
     
     function getCommonPitfallsPro(type) {
       return [
-        'âš ï¸ **Insufficient Detail:** Don\'t be vague - be specific and explicit',
-        'âš ï¸ **Assumption Overload:** State assumptions clearly rather than hiding them',
-        'âš ï¸ **Ignoring Edge Cases:** Boundary conditions often reveal important issues',
-        'âš ï¸ **Poor Organization:** Structure matters - use clear sections and flow',
-        'âš ï¸ **Missing Context:** Provide enough background for understanding'
+        '⚠️ **Insufficient Detail:** Don\'t be vague - be specific and explicit',
+        '⚠️ **Assumption Overload:** State assumptions clearly',
+        '⚠️ **Ignoring Edge Cases:** Boundary conditions reveal important issues'
       ];
     }
-    
-    // === STAGE 6: PQS CALCULATION ===
     
     function calculatePQS(prompt) {
       const metrics = {
@@ -1446,7 +1146,6 @@
         cognitiveLoad: calculateCognitiveLoad(prompt)
       };
       
-      // Weighted sum
       let pqs = 0;
       for (const [metric, value] of Object.entries(metrics)) {
         pqs += value * TPEM.PQS_WEIGHTS[metric];
@@ -1456,7 +1155,7 @@
     }
     
     function calculateClarity(prompt) {
-      let score = 0.3; // base
+      let score = 0.3;
       if (prompt.length > 20) score += 0.2;
       if (/\b(objective|goal|task|need|want)\b/i.test(prompt)) score += 0.2;
       if (!/\b(something|thing|stuff|it|that)\b/i.test(prompt)) score += 0.3;
@@ -1464,7 +1163,7 @@
     }
     
     function calculateStructure(prompt) {
-      let score = 0.2; // base
+      let score = 0.2;
       if (prompt.includes('\n')) score += 0.3;
       if (prompt.includes('##') || prompt.includes('- ')) score += 0.3;
       if (prompt.includes('```') || prompt.includes('|')) score += 0.2;
@@ -1477,7 +1176,7 @@
     }
     
     function calculateModelCompatibility(prompt) {
-      let score = 0.5; // base
+      let score = 0.5;
       if (prompt.length < 2000) score += 0.2;
       if (!/[^\x00-\x7F]/.test(prompt)) score += 0.15;
       if (!/<script|eval\(/i.test(prompt)) score += 0.15;
@@ -1485,7 +1184,7 @@
     }
     
     function calculateGoalAlignment(prompt) {
-      let score = 0.4; // base
+      let score = 0.4;
       if (/\b(create|generate|write|analyze|build|explain)\b/i.test(prompt)) score += 0.3;
       if (prompt.split(' ').length > 8) score += 0.3;
       return Math.min(score, 1);
@@ -1502,13 +1201,11 @@
       return 0.3;
     }
     
-    // === EXPLANATION GENERATION ===
-    
     function generateExplanation(original, enhanced, taskType, ambiguity, pqsBefore, pqsAfter) {
       const changes = [];
       
       if (state.codingMode) {
-        changes.push(`<strong>ðŸ’» Coding Mode Active:</strong> Enhanced with tiered coding constraints (Critical + ${state.codeContext.hasExistingCode ? 'Change Management' : 'Architecture'} + ${state.codeContext.language || 'Auto-detected language'}).`);
+        changes.push(`<strong>💻 Coding Mode Active:</strong> Enhanced with tiered coding constraints.`);
       }
       
       changes.push(`<strong>Task Classification:</strong> Detected as "${taskType}" based on keyword analysis.`);
@@ -1519,35 +1216,31 @@
         'High (significant assumptions required)'
       }`);
       
-      changes.push(`<strong>PQS Improvement:</strong> ${pqsBefore.toFixed(2)} â†’ ${pqsAfter.toFixed(2)} (+${(pqsAfter - pqsBefore).toFixed(2)})`);
+      changes.push(`<strong>PQS Improvement:</strong> ${pqsBefore.toFixed(2)} → ${pqsAfter.toFixed(2)} (+${(pqsAfter - pqsBefore).toFixed(2)})`);
       
-      changes.push(`<strong>Added Structure:</strong> Organized into Role, Task, ${state.codeContext.existingCode ? 'Existing Code Context, ' : ''}Constraints, Process, Output Format, and Quality Bar sections.`);
-      
-      if (state.codingMode) {
-        changes.push(`<strong>Tiered Constraints:</strong> Applied 3 critical rules with examples, ${state.codeContext.hasExistingCode ? 'change management rules' : 'architecture guidelines'}, and ${state.codeContext.language ? state.codeContext.language + '-specific' : 'language-specific'} best practices.`);
-      }
-      
-      changes.push(`<strong>Added Process Steps:</strong> Defined clear methodology for approaching the task systematically.`);
-      
-      if (ambiguity > 0.35) {
-        changes.push(`<strong>Added Assumptions:</strong> Due to high ambiguity, explicit assumptions were documented.`);
-      }
-      
-      changes.push(`<strong>Quality Assurance:</strong> Added verification steps and success criteria to ensure output quality.`);
+      changes.push(`<strong>Added Structure:</strong> Organized into Role, Task, Constraints, Process, Output Format, and Quality Bar sections.`);
       
       return changes;
     }
     
-    // === TASK-SPECIFIC CONTENT ===
-    
     function getRoleForTask(type) {
+      // If coding mode is active, always use coding-specific role
+      if (state.codingMode || type === 'code') {
+        const codingRoles = [
+          'You are a senior software engineer with 15+ years of experience in production systems.',
+          'You are a principal engineer who has architected systems serving millions of users.',
+          'You are a staff engineer specializing in clean architecture and maintainable code.',
+          'You are a tech lead with deep expertise in software design patterns and best practices.'
+        ];
+        return codingRoles[Math.floor(Math.random() * codingRoles.length)];
+      }
+      
       const roles = {
         'generate': 'You are an expert content creator and writer with deep knowledge of persuasive communication.',
         'transform': 'You are a professional editor and content transformer skilled in style adaptation.',
         'analyze': 'You are a senior analyst with expertise in critical thinking and evidence-based reasoning.',
         'plan': 'You are a strategic planner and consultant with experience in project management.',
         'extract': 'You are a data extraction specialist with expertise in structured data processing.',
-        'code': 'You are a senior software engineer with expertise in clean code and best practices.',
         'math': 'You are a mathematics expert skilled in clear explanations and rigorous proofs.',
         'image': 'You are an expert prompt engineer specializing in image generation systems.'
       };
@@ -1555,126 +1248,121 @@
     }
     
     function getConstraintsForTask(type) {
-      const constraints = {
-        'generate': [
-          '- Tone: Engaging and clear',
-          '- Length: 300-500 words unless specified',
-          '- Structure: Use clear headings and logical flow',
-          '- Facts: Cite sources or mark as uncertain',
-          '- Audience: Consider reader expertise level'
-        ],
-        'transform': [
-          '- Fidelity: Preserve core meaning and intent',
-          '- Accuracy: Maintain factual correctness',
-          '- Style: Match requested tone/format exactly',
-          '- Transparency: Note any information loss or additions'
-        ],
-        'analyze': [
-          '- Methodology: Show numbered reasoning steps',
-          '- Evidence: Present supporting data and sources',
-          '- Balance: Consider counterarguments',
-          '- Conclusion: Provide confidence level (0-100%)',
-          '- Format: Final answer first, then reasoning'
-        ],
-        'plan': [
-          '- Scope: Define clear timeframes and resources',
-          '- Metrics: Include measurable KPIs',
-          '- Risks: Identify and mitigate potential issues',
-          '- Ownership: Assign clear responsibilities',
-          '- Milestones: Provide 30/60/90 day checkpoints'
-        ],
-        'extract': [
-          '- Schema: Follow strict JSON structure',
-          '- Accuracy: Only extract; never infer',
-          '- Confidence: Include score per field (0-1)',
-          '- Completeness: Skip missing fields; no hallucination'
-        ],
-        'code': [
+      // For coding, be specific and comprehensive
+      if (state.codingMode || type === 'code') {
+        return [
           '- Language: Specify version and environment',
           '- Contracts: Define input/output clearly',
           '- Testing: Include test cases',
-          '- Performance: Note time/space complexity',
-          '- Edge Cases: Handle errors and boundaries'
+          '- Edge Cases: Handle errors and boundaries',
+          '- Performance: Consider time/space complexity'
+        ];
+      }
+      
+      // For other tasks, add variance - don't always use same generic constraints
+      const baseConstraints = {
+        'generate': [
+          ['- Tone: Engaging and clear', '- Tone: Professional yet approachable', '- Tone: Conversational and authentic'],
+          ['- Length: 300-500 words unless specified', '- Length: Concise but complete', '- Length: As needed to fully address the topic'],
+          ['- Structure: Use clear headings and logical flow', '- Structure: Organize with clear sections', '- Structure: Follow narrative arc'],
+          ['- Facts: Cite sources or mark as uncertain', '- Facts: Verify accuracy', '- Facts: Support claims with evidence']
         ],
-        'math': [
-          '- Steps: Show all work clearly',
-          '- Verification: Check calculations',
-          '- Assumptions: State explicitly',
-          '- Units: Include and verify',
-          '- Precision: Specify decimal places'
+        'transform': [
+          ['- Fidelity: Preserve core meaning and intent', '- Fidelity: Maintain original message'],
+          ['- Accuracy: Maintain factual correctness', '- Accuracy: No information loss'],
+          ['- Style: Match requested tone/format exactly', '- Style: Adapt to target format seamlessly']
         ],
-        'image': [
-          '- Subject: Clear and specific description',
-          '- Composition: Camera angle and framing',
-          '- Lighting: Type and mood',
-          '- Style: Artistic approach or reference',
-          '- Negative: What to avoid',
-          '- Technical: Aspect ratio, seed, steps'
+        'analyze': [
+          ['- Methodology: Show numbered reasoning steps', '- Methodology: Clear analytical framework'],
+          ['- Evidence: Present supporting data and sources', '- Evidence: Data-driven conclusions'],
+          ['- Balance: Consider counterarguments', '- Balance: Multiple perspectives'],
+          ['- Conclusion: Provide confidence level', '- Conclusion: Clear verdict with reasoning']
         ]
       };
-      return constraints[type] || constraints.generate;
+      
+      const options = baseConstraints[type];
+      if (!options) {
+        return [
+          '- Clear and specific output',
+          '- Address all requirements',
+          '- Provide actionable results'
+        ];
+      }
+      
+      // Randomly pick one variant from each constraint category
+      return options.map(variants => 
+        variants[Math.floor(Math.random() * variants.length)]
+      );
     }
     
     function getProcessForTask(type) {
+      // For coding, keep specific and comprehensive
+      if (state.codingMode || type === 'code') {
+        const variants = [
+          [
+            '1. Understand requirements and constraints',
+            '2. Design solution architecture',
+            '3. Implement with tests',
+            '4. Review and refactor'
+          ],
+          [
+            '1. Clarify specification',
+            '2. Outline approach and data structures',
+            '3. Code with documentation',
+            '4. Validate with test cases'
+          ],
+          [
+            '1. Break down problem',
+            '2. Plan implementation strategy',
+            '3. Write clean, documented code',
+            '4. Test edge cases'
+          ]
+        ];
+        return variants[Math.floor(Math.random() * variants.length)];
+      }
+      
+      // Add variance for non-coding tasks
       const processes = {
         'generate': [
-          '1. Identify target audience and purpose',
-          '2. Outline key points and structure',
-          '3. Draft with clear, engaging language',
-          '4. Review for clarity and completeness',
-          '5. Verify factual accuracy'
+          [
+            '1. Identify target audience and purpose',
+            '2. Outline key points and structure',
+            '3. Draft with clear, engaging language',
+            '4. Review for clarity and completeness'
+          ],
+          [
+            '1. Define goals and audience',
+            '2. Structure main ideas',
+            '3. Write compelling content',
+            '4. Polish and refine'
+          ]
         ],
         'transform': [
-          '1. Analyze source content and intent',
-          '2. Map to target format/style requirements',
-          '3. Transform while preserving meaning',
-          '4. Verify accuracy and completeness',
-          '5. Document any changes made'
+          [
+            '1. Analyze source content and intent',
+            '2. Map to target format/style requirements',
+            '3. Transform while preserving meaning',
+            '4. Verify accuracy and completeness'
+          ]
         ],
         'analyze': [
-          '1. List key hypotheses or claims',
-          '2. Gather supporting evidence',
-          '3. Consider counterarguments',
-          '4. Synthesize findings',
-          '5. Draw conclusion with confidence level'
-        ],
-        'plan': [
-          '1. Define goals and success criteria',
-          '2. Identify constraints and resources',
-          '3. Generate and evaluate options',
-          '4. Create detailed roadmap',
-          '5. Define metrics and milestones'
-        ],
-        'extract': [
-          '1. Parse input against schema',
-          '2. Extract only present data',
-          '3. Validate format and types',
-          '4. Calculate confidence scores',
-          '5. Return structured output'
-        ],
-        'code': [
-          '1. Restate specification clearly',
-          '2. Outline design and approach',
-          '3. Implement with clean, documented code',
-          '4. Add comprehensive tests',
-          '5. Document usage and limitations'
-        ],
-        'math': [
-          '1. Identify knowns and unknowns',
-          '2. Choose appropriate method',
-          '3. Execute calculation step-by-step',
-          '4. Verify result makes sense',
-          '5. State final answer with units'
-        ],
-        'image': [
-          '1. Define subject and action',
-          '2. Specify composition and framing',
-          '3. Describe style and mood',
-          '4. Add technical parameters',
-          '5. Create negative prompts'
+          [
+            '1. List key hypotheses or claims',
+            '2. Gather supporting evidence',
+            '3. Consider counterarguments',
+            '4. Synthesize findings'
+          ],
+          [
+            '1. Define analytical framework',
+            '2. Examine evidence systematically',
+            '3. Weigh competing explanations',
+            '4. Draw conclusions'
+          ]
         ]
       };
-      return processes[type] || processes.generate;
+      
+      const variants = processes[type] || processes.generate;
+      return variants[Math.floor(Math.random() * variants.length)];
     }
     
     function getOutputForTask(type) {
@@ -1682,56 +1370,46 @@
         'generate': [
           '- Use Markdown with clear headings',
           '- Structure: Introduction, Body, Conclusion',
-          '- Include relevant examples or data',
-          '- End with key takeaways or action items'
+          '- Include relevant examples or data'
         ],
         'transform': [
           '- Match requested output format exactly',
           '- Preserve original structure if applicable',
-          '- Include change log if significant edits',
-          '- Maintain original attribution and sources'
+          '- Include change log if significant edits'
         ],
         'analyze': [
           '- **Final Answer:** [one clear sentence]',
           '- **Reasoning:** [numbered steps with evidence]',
-          '- **Confidence:** [0-100% with justification]',
-          '- **Caveats:** [what would change the conclusion]'
+          '- **Confidence:** [0-100% with justification]'
         ],
         'plan': [
           '- **Roadmap:** Timeline or Gantt chart',
           '- **KPIs:** Bulleted list with targets',
-          '- **Risk Register:** Threats + mitigation',
-          '- **Week 1 Checklist:** Immediate actions'
+          '- **Risk Register:** Threats + mitigation'
         ],
         'extract': [
           '- Valid JSON matching provided schema',
-          '- Include "_confidence" field per object (0-1)',
-          '- Use null for missing required fields',
-          '- Add "_metadata" with extraction notes'
+          '- Include "_confidence" field per object',
+          '- Use null for missing required fields'
         ],
         'code': [
           '- **Code:** Syntax-highlighted blocks',
           '- **Tests:** Cases with expected output',
-          '- **Usage:** Command/function to run',
-          '- **Notes:** Complexity, limits, edge cases'
+          '- **Usage:** Command/function to run'
         ],
         'math': [
           '- **Given:** List knowns',
           '- **Solution:** Step-by-step with equations',
-          '- **Answer:** Final result with units',
-          '- **Verification:** Sanity check'
+          '- **Answer:** Final result with units'
         ],
         'image': [
           '- **Main Prompt:** Single comprehensive string',
           '- **Negative Prompt:** What to exclude',
-          '- **Settings:** aspect, seed, steps, cfg',
-          '- **Variations:** 2-3 alternative approaches'
+          '- **Settings:** aspect, seed, steps, cfg'
         ]
       };
       return outputs[type] || outputs.generate;
     }
-    
-    // === UI HELPERS ===
     
     function createMessageContainer() {
       const container = document.createElement('div');
@@ -1773,17 +1451,14 @@
       const pqsScore = container.querySelector('.tp-pqs-score');
       const meta = container.querySelector('.tp-msg-meta');
       
-      // Set content
       content.textContent = result.enhanced;
       
-      // Set PQS if enabled
       if (state.showPQS) {
         footer.style.display = 'flex';
         pqsScore.textContent = `${result.pqsAfter.toFixed(2)} (+${result.deltaQ.toFixed(2)})`;
-        meta.textContent = `${result.taskType.toUpperCase()} Â· TPEM-${state.mode.toUpperCase()} Â· Ambiguity: ${result.ambiguityScore.toFixed(2)}`;
+        meta.textContent = `${result.taskType.toUpperCase()} · TPEM-${state.mode.toUpperCase()} · Ambiguity: ${result.ambiguityScore.toFixed(2)}`;
       }
       
-      // Add explanation if enabled
       if (result.explanation) {
         const explDiv = document.createElement('div');
         explDiv.className = 'tp-explanation';
@@ -1797,7 +1472,6 @@
         content.parentNode.insertBefore(explDiv, footer);
       }
       
-      // Setup copy button
       const copyBtn = container.querySelector('.tp-copy-btn');
       copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(result.enhanced).then(() => {
@@ -1810,7 +1484,6 @@
         });
       });
       
-      // Setup save button
       const saveBtn = container.querySelector('.tp-save-btn');
       saveBtn.addEventListener('click', () => {
         savePrompt(result.enhanced, result.original);
@@ -1855,7 +1528,6 @@
         </div>
       `).join('');
       
-      // Add click handlers
       elements.savedList.querySelectorAll('.tp-saved-item').forEach(item => {
         item.addEventListener('click', (e) => {
           if (e.target.closest('.tp-saved-item-delete')) {
@@ -1900,6 +1572,10 @@
       }
     }
     
+    function updateVibeModeUI() {
+      elements.vibeMode?.classList.toggle('active', state.vibeMode);
+    }
+    
     function updateStatus(statusType, text) {
       if (elements.status) {
         elements.status.textContent = text;
@@ -1916,64 +1592,6 @@
       }, 100);
     }
     
-    console.log('[TigerPrompts v8.0] Initialization complete âœ“');
-    console.log('[TigerPrompts v8.0] Tiered constraints system active');
-    console.log('[TigerPrompts v8.0] AI response validator ready');
+    console.log('[TigerPrompts v8.0] Initialization complete ✓');
   });
 })();
-/* === TIGER PROMPTS v8.5 — Variance + Tooltip Engine === */
-const tpVariance = 0.3; // Adjust 0–1 range for how "different" rewording should feel
-
-function randomizeResponse(text) {
-  const synonyms = {
-    "improve": ["enhance", "refine", "upgrade"],
-    "help": ["assist", "support", "empower"],
-    "create": ["build", "craft", "generate"],
-    "make": ["design", "develop", "compose"],
-  };
-  return text.split(" ").map(word => {
-    const key = word.toLowerCase();
-    if (synonyms[key] && Math.random() < tpVariance)
-      return synonyms[key][Math.floor(Math.random() * synonyms[key].length)];
-    return word;
-  }).join(" ");
-}
-
-function explainChange() {
-  const reasons = [
-    "Clarified sentence structure for readability.",
-    "Replaced weak verbs for stronger engagement.",
-    "Reduced redundancy to tighten phrasing.",
-    "Improved tone consistency.",
-    "Adjusted pacing for smoother flow."
-  ];
-  return reasons[Math.floor(Math.random() * reasons.length)];
-}
-
-function renderEnhancedOutput(inputText, container) {
-  const sentences = inputText.split(".");
-  let html = "";
-  sentences.forEach(sentence => {
-    if (!sentence.trim()) return;
-    const revised = randomizeResponse(sentence.trim());
-    const tooltip = explainChange();
-    html += `
-      <div class="tp-line">
-        <span>${revised}.</span>
-        <span class="tp-tooltip" data-tooltip="${tooltip}">?</span>
-      </div>`;
-  });
-  container.innerHTML = html;
-}
-
-function showThinking(container, callback) {
-  let dots = 0;
-  const interval = setInterval(() => {
-    container.textContent = "Thinking" + ".".repeat(dots % 4);
-    dots++;
-  }, 300);
-  setTimeout(() => {
-    clearInterval(interval);
-    callback();
-  }, 1800);
-}
