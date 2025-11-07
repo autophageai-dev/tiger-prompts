@@ -1,7 +1,7 @@
 {% comment %}
   Tiger Prompts v8.0 — TPEM-1.1 Enhanced Implementation
   
-  New Features:
+  Features:
   - Tiered constraint system (Critical, Context-Specific, Language-Specific)
   - Coding context panel (existing code, language selector, test options)
   - AI Response Validator
@@ -9,7 +9,6 @@
   - Context-aware enhancements
 {% endcomment %}
 
-<!-- Font Awesome CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 {{ 'tiger-prompts.css' | asset_url | stylesheet_tag }}
@@ -18,10 +17,8 @@
 <section id="tiger-prompts" class="tp-app">
   <div class="tp-layout">
     
-    <!-- ===== SIDEBAR ===== -->
     <aside id="tp-sidebar" class="tp-sidebar">
       
-      <!-- Sidebar Header -->
       <div class="tp-sidebar-head">
         <div class="tp-sidebar-brand">
           <img 
@@ -39,16 +36,13 @@
         </button>
       </div>
       
-      <!-- TPEM Branding -->
       <div class="tp-tpem-badge">
         <div>⚡ TPEM-1.1</div>
         <div class="tp-tpem-version">Tiered Constraints System</div>
       </div>
       
-      <!-- Navigation -->
       <nav class="tp-nav">
         
-        <!-- Appearance -->
         <div class="tp-nav-section">
           <div class="tp-nav-title">Appearance</div>
           <button id="tp-theme-toggle" class="tp-btn tp-btn--black">
@@ -57,7 +51,6 @@
           </button>
         </div>
         
-        <!-- Mode -->
         <div class="tp-nav-section">
           <div class="tp-nav-title">Enhancement Mode</div>
           <button id="tp-mode-lite" class="tp-btn tp-btn--ghost active" data-mode="lite">
@@ -70,7 +63,6 @@
           </button>
         </div>
         
-        <!-- Settings -->
         <div class="tp-nav-section">
           <div class="tp-nav-title">Settings</div>
           <button id="tp-explain-toggle" class="tp-btn tp-btn--ghost">
@@ -81,9 +73,12 @@
             <i class="fa-solid fa-chart-line"></i>
             <span>Show PQS Score</span>
           </button>
+          <button id="tp-vibe-mode" class="tp-btn tp-btn--ghost" title="Vibe Coding Directive">
+            <i class="fa-solid fa-tiger"></i>
+            <span>Vibe Coding</span>
+          </button>
         </div>
         
-        <!-- Presets -->
         <div class="tp-nav-section">
           <div class="tp-nav-title">Quick Presets</div>
           <div class="tp-preset-item" data-preset="code">
@@ -100,7 +95,6 @@
           </div>
         </div>
         
-        <!-- Saved Prompts -->
         <div class="tp-nav-section">
           <div class="tp-nav-title">Saved Prompts</div>
           <div id="tp-saved-list" class="tp-saved-list">
@@ -108,7 +102,6 @@
           </div>
         </div>
         
-        <!-- Actions -->
         <div class="tp-nav-section">
           <div class="tp-nav-title">Actions</div>
           <button id="tp-reset" class="tp-btn tp-btn--ghost">
@@ -117,7 +110,6 @@
           </button>
         </div>
         
-        <!-- Support -->
         <div class="tp-nav-section">
           <div class="tp-nav-title">Support</div>
           <a href="https://buymeacoffee.com/tigerprompts" 
@@ -131,18 +123,15 @@
         
       </nav>
       
-      <!-- Collapse Tab -->
       <button id="tp-collapse-tab" class="tp-collapse-tab" title="Expand sidebar">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
       
     </aside>
     
-    <!-- ===== MAIN AREA ===== -->
     <main class="tp-main">
       <div class="tp-container">
         
-        <!-- Logo -->
         <div class="tp-logo-wrap">
           <img 
             id="tp-logo" 
@@ -151,7 +140,6 @@
             alt="Tiger Prompts">
         </div>
         
-        <!-- Input Bar -->
         <div class="tp-input-wrap">
           <textarea 
             id="tp-input" 
@@ -169,13 +157,11 @@
             </button>
           </div>
           
-          <!-- Live PQS Indicator -->
           <div id="tp-live-pqs" class="tp-live-pqs" style="display: none;">
             PQS: --
           </div>
         </div>
         
-        <!-- Coding Mode Toggle -->
         <div id="tp-coding-mode" class="tp-coding-mode" title="Click to toggle Coding Mode">
           <div class="tp-coding-toggle">
             <div class="tp-coding-toggle-knob"></div>
@@ -191,7 +177,6 @@
           </div>
         </div>
         
-        <!-- NEW: Coding Context Panel -->
         <div id="tp-coding-context" class="tp-coding-context" style="display: none;">
           <div class="tp-context-header">
             <i class="fa-solid fa-sliders"></i>
@@ -199,6 +184,18 @@
           </div>
           
           <div class="tp-context-body">
+            <div class="tp-context-field">
+              <label>File Names (comma-separated - e.g., app.js, styles.css, index.html):</label>
+              <input 
+                type="text" 
+                id="tp-file-defs" 
+                class="tp-context-input"
+                placeholder="tiger-prompts.js, tiger-prompts.css, tiger-prompts.liquid" />
+              <small style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block;">
+                AI will be instructed to never change these filenames
+              </small>
+            </div>
+            
             <div class="tp-context-row">
               <label class="tp-context-checkbox">
                 <input type="checkbox" id="tp-ctx-existing" />
@@ -215,15 +212,27 @@
             
             <div class="tp-context-row tp-context-grid">
               <div class="tp-context-field">
-                <label>Language:</label>
-                <select id="tp-ctx-language" class="tp-context-select">
-                  <option value="">Auto-detect</option>
+                <label>Languages (select multiple):</label>
+                <select id="tp-ctx-language" class="tp-context-select" multiple size="3">
                   <option value="javascript">JavaScript</option>
-                  <option value="react">React</option>
                   <option value="typescript">TypeScript</option>
+                  <option value="react">React</option>
+                  <option value="vue">Vue</option>
+                  <option value="angular">Angular</option>
                   <option value="python">Python</option>
-                  <option value="rust">Rust</option>
+                  <option value="java">Java</option>
+                  <option value="csharp">C#</option>
+                  <option value="cpp">C++</option>
+                  <option value="php">PHP</option>
+                  <option value="ruby">Ruby</option>
                   <option value="go">Go</option>
+                  <option value="rust">Rust</option>
+                  <option value="swift">Swift</option>
+                  <option value="kotlin">Kotlin</option>
+                  <option value="html">HTML</option>
+                  <option value="css">CSS</option>
+                  <option value="sql">SQL</option>
+                  <option value="liquid">Liquid</option>
                 </select>
               </div>
               
@@ -237,10 +246,8 @@
           </div>
         </div>
         
-        <!-- Message Thread -->
         <div id="tp-thread" class="tp-thread"></div>
         
-        <!-- NEW: AI Response Validator -->
         <div class="tp-validator-section">
           <div class="tp-validator-header">
             <h3>
@@ -262,11 +269,9 @@
           </button>
           
           <div id="tp-validate-results" class="tp-validate-results" style="display: none;">
-            <!-- Validation results will appear here -->
           </div>
         </div>
         
-        <!-- Footer -->
         <footer class="tp-footer">
           <div class="tp-footer-content">
             <div id="tp-status-indicator" class="tp-status-indicator ready">
