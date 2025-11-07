@@ -1,12 +1,10 @@
 {% comment %}
-  Tiger Prompts v8.0 — TPEM-1.1 Enhanced Implementation
+  Tiger Prompts v9.0 — LLM Agent Mode + Vibe Coding Tools
   
-  Features:
-  - Tiered constraint system (Critical, Context-Specific, Language-Specific)
-  - Coding context panel (existing code, language selector, test options)
-  - AI Response Validator
-  - Live PQS indicator
-  - Context-aware enhancements
+  NEW Features:
+  - LLM Agent Mode (ON by default) with Light/Deep enhancement
+  - Synced Vibe Coding Mode (purple themed)
+  - Code Explainer, Refactor Advisor, Bug Hunter, Doc Generator, Test Writer
 {% endcomment %}
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,8 +35,8 @@
       </div>
       
       <div class="tp-tpem-badge">
-        <div>⚡ TPEM-1.1</div>
-        <div class="tp-tpem-version">Tiered Constraints System</div>
+        <div>⚡ TPEM-2.0</div>
+        <div class="tp-tpem-version">LLM Agent Mode + Vibe Coding</div>
       </div>
       
       <nav class="tp-nav">
@@ -52,15 +50,21 @@
         </div>
         
         <div class="tp-nav-section">
-          <div class="tp-nav-title">Enhancement Mode</div>
-          <button id="tp-mode-lite" class="tp-btn tp-btn--ghost active" data-mode="lite">
-            <i class="fa-solid fa-bolt"></i>
-            <span>TPEM-Lite</span>
+          <div class="tp-nav-title">Enhancement Engine</div>
+          <button id="tp-llm-agent-toggle" class="tp-btn tp-btn--ghost active">
+            <i class="fa-solid fa-robot"></i>
+            <span>LLM Agent Mode</span>
           </button>
-          <button id="tp-mode-pro" class="tp-btn tp-btn--ghost" data-mode="pro">
-            <i class="fa-solid fa-rocket"></i>
-            <span>TPEM-Pro</span>
-          </button>
+          <div id="tp-llm-submodes" class="tp-llm-submodes">
+            <button id="tp-llm-light" class="tp-btn tp-btn--ghost active" data-mode="light">
+              <i class="fa-solid fa-feather"></i>
+              <span>Light Enhancement</span>
+            </button>
+            <button id="tp-llm-deep" class="tp-btn tp-btn--ghost" data-mode="deep">
+              <i class="fa-solid fa-layer-group"></i>
+              <span>Deep Enhancement</span>
+            </button>
+          </div>
         </div>
         
         <div class="tp-nav-section">
@@ -72,10 +76,6 @@
           <button id="tp-pqs-toggle" class="tp-btn tp-btn--ghost">
             <i class="fa-solid fa-chart-line"></i>
             <span>Show PQS Score</span>
-          </button>
-          <button id="tp-vibe-mode" class="tp-btn tp-btn--ghost" title="Vibe Coding Directive">
-            <i class="fa-solid fa-tiger"></i>
-            <span>Vibe Coding</span>
           </button>
         </div>
         
@@ -162,25 +162,25 @@
           </div>
         </div>
         
-        <div id="tp-coding-mode" class="tp-coding-mode" title="Click to toggle Coding Mode">
-          <div class="tp-coding-toggle">
-            <div class="tp-coding-toggle-knob"></div>
+        <div id="tp-vibe-coding-mode" class="tp-vibe-coding-mode" title="Click to toggle Vibe Coding Mode">
+          <div class="tp-vibe-toggle">
+            <div class="tp-vibe-toggle-knob"></div>
           </div>
-          <div class="tp-coding-label">
-            <div class="tp-coding-label-main">
+          <div class="tp-vibe-label">
+            <div class="tp-vibe-label-main">
               <i class="fa-solid fa-code"></i>
-              <span>Coding Mode</span>
+              <span>Vibe Coding Mode</span>
             </div>
-            <div class="tp-coding-label-sub">
-              Tiered constraints for AI-assisted coding
+            <div class="tp-vibe-label-sub">
+              AI-powered coding assistance with radical transparency
             </div>
           </div>
         </div>
         
-        <div id="tp-coding-context" class="tp-coding-context" style="display: none;">
+        <div id="tp-vibe-context" class="tp-vibe-context" style="display: none;">
           <div class="tp-context-header">
             <i class="fa-solid fa-sliders"></i>
-            <span>Coding Context (Optional - for better results)</span>
+            <span>Vibe Coding Context (Optional - for better results)</span>
           </div>
           
           <div class="tp-context-body">
@@ -248,6 +248,90 @@
         
         <div id="tp-thread" class="tp-thread"></div>
         
+        <div class="tp-vibe-tools-section">
+          <div class="tp-vibe-tools-header">
+            <h3>
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              Vibe Coding Tools
+            </h3>
+            <p>AI-powered utilities to supercharge your development workflow</p>
+          </div>
+          
+          <div class="tp-vibe-tools-grid">
+            
+            <div class="tp-vibe-tool" id="tp-tool-explainer">
+              <div class="tp-vibe-tool-icon">🔍</div>
+              <div class="tp-vibe-tool-content">
+                <h4>Code Explainer</h4>
+                <p>Get clear explanations of any code snippet</p>
+              </div>
+            </div>
+            
+            <div class="tp-vibe-tool" id="tp-tool-refactor">
+              <div class="tp-vibe-tool-icon">🔧</div>
+              <div class="tp-vibe-tool-content">
+                <h4>Refactor Advisor</h4>
+                <p>AI-powered improvement suggestions</p>
+              </div>
+            </div>
+            
+            <div class="tp-vibe-tool" id="tp-tool-bug-hunter">
+              <div class="tp-vibe-tool-icon">🐛</div>
+              <div class="tp-vibe-tool-content">
+                <h4>Bug Hunter</h4>
+                <p>Analyze code for potential issues</p>
+              </div>
+            </div>
+            
+            <div class="tp-vibe-tool" id="tp-tool-doc-gen">
+              <div class="tp-vibe-tool-icon">📝</div>
+              <div class="tp-vibe-tool-content">
+                <h4>Doc Generator</h4>
+                <p>Auto-generate documentation</p>
+              </div>
+            </div>
+            
+            <div class="tp-vibe-tool" id="tp-tool-test-writer">
+              <div class="tp-vibe-tool-icon">🧪</div>
+              <div class="tp-vibe-tool-content">
+                <h4>Test Writer</h4>
+                <p>Generate comprehensive test cases</p>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <div id="tp-vibe-tool-modal" class="tp-vibe-tool-modal" style="display: none;">
+          <div class="tp-modal-overlay"></div>
+          <div class="tp-modal-content">
+            <div class="tp-modal-header">
+              <h3 id="tp-modal-title">Tool Name</h3>
+              <button id="tp-modal-close" class="tp-modal-close">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="tp-modal-body">
+              <textarea 
+                id="tp-modal-input" 
+                class="tp-modal-textarea"
+                placeholder="Paste your code here..."
+                rows="12"></textarea>
+              <button id="tp-modal-submit" class="tp-btn tp-btn--orange tp-modal-submit">
+                <i class="fa-solid fa-paper-plane"></i>
+                Analyze Code
+              </button>
+            </div>
+            <div id="tp-modal-results" class="tp-modal-results" style="display: none;">
+              <div class="tp-modal-results-header">
+                <i class="fa-solid fa-check-circle"></i>
+                <span>Analysis Complete</span>
+              </div>
+              <div id="tp-modal-results-content" class="tp-modal-results-content"></div>
+            </div>
+          </div>
+        </div>
+        
         <div class="tp-validator-section">
           <div class="tp-validator-header">
             <h3>
@@ -295,11 +379,11 @@
   "settings": [
     {
       "type": "header",
-      "content": "Tiger Prompts v8.0 Settings"
+      "content": "Tiger Prompts v9.0 Settings"
     },
     {
       "type": "paragraph",
-      "content": "Enhanced with Tiered Constraints System and AI Response Validator"
+      "content": "Enhanced with LLM Agent Mode and Vibe Coding Tools"
     },
     {
       "type": "text",
@@ -307,6 +391,12 @@
       "label": "Section Title",
       "default": "Tiger Prompts",
       "info": "Internal reference for section"
+    },
+    {
+      "type": "text",
+      "id": "openai_api_key",
+      "label": "OpenAI API Key",
+      "info": "Your OpenAI API key for LLM Agent Mode"
     },
     {
       "type": "checkbox",
@@ -327,24 +417,14 @@
       "id": "show_pqs",
       "label": "Show PQS Scores by Default",
       "default": true,
-      "info": "Display Prompt Quality Scores (TPEM-1.1)"
+      "info": "Display Prompt Quality Scores"
     },
     {
-      "type": "select",
-      "id": "default_mode",
-      "label": "Default Enhancement Mode",
-      "options": [
-        {
-          "value": "lite",
-          "label": "TPEM-Lite (Fast, Local)"
-        },
-        {
-          "value": "pro",
-          "label": "TPEM-Pro (Advanced)"
-        }
-      ],
-      "default": "lite",
-      "info": "Choose default TPEM mode"
+      "type": "checkbox",
+      "id": "llm_agent_default",
+      "label": "Enable LLM Agent Mode by Default",
+      "default": true,
+      "info": "Use OpenAI for prompt enhancement"
     },
     {
       "type": "header",
@@ -363,7 +443,7 @@
   ],
   "presets": [
     {
-      "name": "Tiger Prompts TPEM-1.1",
+      "name": "Tiger Prompts v9.0",
       "category": "Custom"
     }
   ]
