@@ -32,7 +32,6 @@ body.tp-dark {
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
-/* === HIDE SHOPIFY HEADER & CHATBOT === */
 #shopify-section-header,
 .shopify-section-header,
 header[class*="header"],
@@ -44,12 +43,28 @@ iframe[src*="support"],
 [id*="chat-widget"],
 [id*="tidio"],
 [class*="tidio"],
+[id*="intercom"],
+[class*="intercom"],
+[id*="drift"],
+[class*="drift"],
+[id*="zendesk"],
+[class*="zendesk"],
 .gorgias-chat-container,
-button[class*="chat"]:not(.tp-app button) {
+button[class*="chat"]:not(.tp-app button),
+div[id*="chat"],
+div[class*="chat"]:not(.tp-app *),
+#launcher,
+.launcher,
+.chat-bubble,
+.chat-widget,
+.chat-button {
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  z-index: -1 !important;
 }
 
 * {
@@ -64,7 +79,6 @@ button[class*="chat"]:not(.tp-app button) {
   transition: background var(--transition), color var(--transition);
 }
 
-/* === LAYOUT === */
 .tp-layout {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -97,7 +111,6 @@ button[class*="chat"]:not(.tp-app button) {
   }
 }
 
-/* === SIDEBAR === */
 .tp-sidebar {
   background: var(--sidebar-bg);
   color: #ffffff;
@@ -489,7 +502,6 @@ button[class*="chat"]:not(.tp-app button) {
   display: flex;
 }
 
-/* === MAIN AREA === */
 .tp-main {
   display: flex;
   justify-content: center;
@@ -536,7 +548,6 @@ button[class*="chat"]:not(.tp-app button) {
   transform: scale(1.02);
 }
 
-/* === INPUT BAR === */
 .tp-input-wrap {
   position: relative;
   width: 100%;
@@ -1012,8 +1023,7 @@ body.tp-dark .tp-coding-context {
 }
 
 .tp-copy-btn,
-.tp-save-btn,
-.tp-explain-btn {
+.tp-save-btn {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
@@ -1029,8 +1039,7 @@ body.tp-dark .tp-coding-context {
 }
 
 .tp-copy-btn:hover,
-.tp-save-btn:hover,
-.tp-explain-btn:hover {
+.tp-save-btn:hover {
   background: var(--orange);
   color: white;
   border-color: var(--orange);
@@ -1039,8 +1048,7 @@ body.tp-dark .tp-coding-context {
 }
 
 .tp-copy-btn:active,
-.tp-save-btn:active,
-.tp-explain-btn:active {
+.tp-save-btn:active {
   transform: translateY(0);
 }
 
@@ -1179,6 +1187,44 @@ body.tp-dark .tp-msg-footer {
   0% { width: 0%; }
   50% { width: 70%; }
   100% { width: 100%; }
+}
+
+.tp-thinking {
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tp-thinking-dots {
+  display: inline-block;
+  width: 40px;
+  text-align: left;
+  color: var(--orange);
+}
+
+.tp-context-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid rgba(139, 92, 246, 0.2);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.tp-context-input:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.tp-context-input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
 }
 
 .tp-validator-section {
@@ -1490,7 +1536,6 @@ body.tp-dark .tp-validate-issue-fix {
   box-shadow: var(--shadow-sm);
 }
 
-/* === FOOTER === */
 .tp-footer {
   text-align: center;
   padding: 32px 0 24px;
@@ -1552,7 +1597,6 @@ body.tp-dark .tp-validate-issue-fix {
   border-bottom-color: var(--orange);
 }
 
-/* === RESPONSIVE === */
 @media (max-width: 768px) {
   .tp-main {
     padding: 32px 20px 60px;
@@ -1600,7 +1644,7 @@ html {
   background: var(--orange-glow);
   color: var(--text);
 }
-/* === HIDE SHOPIFY FOOTER & CHATBOT COMPLETELY === */
+
 #shopify-section-footer,
 footer,
 .shopify-section-footer,
@@ -1616,50 +1660,4 @@ div[class*="chat-launcher"] {
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-}
-.tp-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: var(--msg-bg);
-  box-shadow: var(--shadow-sm);
-}
-
-.tp-tooltip {
-  background: var(--orange-dark);
-  color: #fff;
-  font-weight: 600;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: help;
-  font-size: 12px;
-  position: relative;
-}
-
-.tp-tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #111;
-  color: #fff;
-  padding: 5px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.tp-tooltip:hover::after {
-  opacity: 1;
 }
