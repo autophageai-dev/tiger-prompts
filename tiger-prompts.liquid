@@ -1,10 +1,13 @@
 {% comment %}
-  Tiger Prompts v9.0 — LLM Agent Mode + Vibe Coding Tools
+  Tiger Prompts v10 — Production Ready
   
-  NEW Features:
-  - LLM Agent Mode (ON by default) with Light/Deep enhancement
-  - Synced Vibe Coding Mode (purple themed)
-  - Code Explainer, Refactor Advisor, Bug Hunter, Doc Generator, Test Writer
+  NEW in v10:
+  - Vibe settings in slide-out drawer (frees vertical space)
+  - Orange primary color (80%), Purple for vibe only (20%)
+  - Logo hides completely after first message
+  - "Run Enhanced Prompt" button in message cards
+  - Mobile responsive with proper touch targets
+  - ChatGPT-style clean message display
 {% endcomment %}
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,44 +37,86 @@
         </button>
       </div>
       
-      <div class="tp-tpem-badge">
-        <div>⚡ TPEM-2.0</div>
-        <div class="tp-tpem-version">LLM Agent Mode + Vibe Coding</div>
-      </div>
-      
       <nav class="tp-nav">
         
         <div class="tp-nav-section">
-          <div class="tp-nav-title">Appearance</div>
-          <button id="tp-theme-toggle" class="tp-btn tp-btn--black">
-            <i class="fa-solid fa-moon"></i>
-            <span>Toggle Theme</span>
-          </button>
-        </div>
-        
-        <div class="tp-nav-section">
-          <div class="tp-nav-title">Enhancement Engine</div>
-          <button id="tp-llm-agent-toggle" class="tp-btn tp-btn--ghost active">
-            <i class="fa-solid fa-robot"></i>
-            <span>LLM Agent Mode</span>
-          </button>
-          <div id="tp-llm-submodes" class="tp-llm-submodes">
-            <button id="tp-llm-light" class="tp-btn tp-btn--ghost active" data-mode="light">
-              <i class="fa-solid fa-feather"></i>
-              <span>Light Enhancement</span>
-            </button>
-            <button id="tp-llm-deep" class="tp-btn tp-btn--ghost" data-mode="deep">
-              <i class="fa-solid fa-layer-group"></i>
-              <span>Deep Enhancement</span>
-            </button>
+          <div class="tp-nav-title">
+            Vibe Coding
+            <span class="tp-tooltip" data-tooltip="Enable specialized coding mode with file tracking, context management, and code-specific enhancements">
+              <i class="fa-solid fa-circle-info"></i>
+            </span>
+          </div>
+          
+          <div class="tp-toggle-item tp-toggle-vibe" id="tp-vibe-coding-toggle">
+            <div class="tp-toggle-content">
+              <i class="fa-solid fa-code"></i>
+              <span>Vibe Coding Mode</span>
+            </div>
+            <div class="tp-toggle-switch">
+              <div class="tp-toggle-knob"></div>
+            </div>
           </div>
         </div>
         
         <div class="tp-nav-section">
-          <div class="tp-nav-title">Settings</div>
+          <div class="tp-nav-title">
+            Enhancement Engine
+            <span class="tp-tooltip" data-tooltip="Choose between AI-powered LLM enhancement (OpenAI) or local TPEM algorithm. Control depth and auto-execution settings">
+              <i class="fa-solid fa-circle-info"></i>
+            </span>
+          </div>
+          
+          <div class="tp-toggle-item tp-toggle-orange" id="tp-llm-toggle">
+            <div class="tp-toggle-content">
+              <i class="fa-solid fa-robot"></i>
+              <span>LLM Agent Mode</span>
+            </div>
+            <div class="tp-toggle-switch">
+              <div class="tp-toggle-knob"></div>
+            </div>
+          </div>
+          <div class="tp-toggle-hint">Use OpenAI for enhancement (default)</div>
+          
+          <div class="tp-field-group">
+            <label class="tp-field-label">Enhancement Depth</label>
+            <select id="tp-enhancement-depth" class="tp-select">
+              <option value="light" selected>✨ Light (Quick Polish)</option>
+              <option value="deep">🔥 Deep (Full Structure)</option>
+            </select>
+          </div>
+          
+          <div class="tp-toggle-item tp-toggle-orange" id="tp-auto-run-toggle">
+            <div class="tp-toggle-content">
+              <i class="fa-solid fa-play"></i>
+              <span>Auto-Run Prompts</span>
+            </div>
+            <div class="tp-toggle-switch">
+              <div class="tp-toggle-knob"></div>
+            </div>
+          </div>
+          <div class="tp-toggle-hint">Run enhanced prompt through LLM automatically</div>
+          
+          <div class="tp-field-group">
+            <label class="tp-field-label">LLM Selection</label>
+            <select id="tp-llm-select" class="tp-select">
+              <option value="gpt-4o-mini">ChatGPT 4o-mini</option>
+              <option value="gpt-4o">ChatGPT 4o (Best) 💎</option>
+              <option value="claude-sonnet" disabled>Claude Sonnet (Soon)</option>
+              <option value="copilot" disabled>Copilot (Soon)</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="tp-nav-section">
+          <div class="tp-nav-title">
+            Display
+            <span class="tp-tooltip" data-tooltip="Toggle visibility of detailed explanations and Prompt Quality Score (PQS) metrics in results">
+              <i class="fa-solid fa-circle-info"></i>
+            </span>
+          </div>
           <button id="tp-explain-toggle" class="tp-btn tp-btn--ghost">
             <i class="fa-solid fa-graduation-cap"></i>
-            <span>Explain Changes</span>
+            <span>Show Explanations</span>
           </button>
           <button id="tp-pqs-toggle" class="tp-btn tp-btn--ghost">
             <i class="fa-solid fa-chart-line"></i>
@@ -80,45 +125,32 @@
         </div>
         
         <div class="tp-nav-section">
-          <div class="tp-nav-title">Quick Presets</div>
-          <div class="tp-preset-item" data-preset="code">
-            <div class="tp-preset-name"><i class="fa-solid fa-code"></i> Code Assistant</div>
-            <div class="tp-preset-desc">Software engineering tasks</div>
+          <div class="tp-nav-title">
+            Settings
+            <span class="tp-tooltip" data-tooltip="Switch between light and dark themes, or clear your conversation history">
+              <i class="fa-solid fa-circle-info"></i>
+            </span>
           </div>
-          <div class="tp-preset-item" data-preset="copy">
-            <div class="tp-preset-name"><i class="fa-solid fa-pen-fancy"></i> Copywriting</div>
-            <div class="tp-preset-desc">Marketing & content</div>
-          </div>
-          <div class="tp-preset-item" data-preset="analyze">
-            <div class="tp-preset-name"><i class="fa-solid fa-magnifying-glass-chart"></i> Analysis</div>
-            <div class="tp-preset-desc">Deep reasoning tasks</div>
-          </div>
-        </div>
-        
-        <div class="tp-nav-section">
-          <div class="tp-nav-title">Saved Prompts</div>
-          <div id="tp-saved-list" class="tp-saved-list">
-            <div style="font-size: 11px; opacity: 0.5; padding: 8px;">No saved prompts yet</div>
-          </div>
-        </div>
-        
-        <div class="tp-nav-section">
-          <div class="tp-nav-title">Actions</div>
+          <button id="tp-theme-toggle" class="tp-btn tp-btn--ghost">
+            <i class="fa-solid fa-moon"></i>
+            <span>Toggle Theme</span>
+          </button>
           <button id="tp-reset" class="tp-btn tp-btn--ghost">
-            <i class="fa-solid fa-rotate-right"></i>
-            <span>Reset</span>
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Clear History</span>
           </button>
         </div>
         
-        <div class="tp-nav-section">
-          <div class="tp-nav-title">Support</div>
-          <a href="https://buymeacoffee.com/tigerprompts" 
-             target="_blank" 
-             class="tp-btn tp-btn--orange"
-             title="Tip What It's Worth">
-            <i class="fa-solid fa-mug-hot"></i>
-            <span>Tip What It's Worth</span>
-          </a>
+        <div class="tp-nav-section tp-nav-section--saved">
+          <div class="tp-nav-title">
+            Saved Prompts
+            <span class="tp-tooltip" data-tooltip="Access your bookmarked enhanced prompts. Click any saved prompt to load it back into the input">
+              <i class="fa-solid fa-circle-info"></i>
+            </span>
+          </div>
+          <div id="tp-saved-list" class="tp-saved-list">
+            <div class="tp-saved-empty">No saved prompts yet</div>
+          </div>
         </div>
         
       </nav>
@@ -132,237 +164,54 @@
     <main class="tp-main">
       <div class="tp-container">
         
-        <div class="tp-logo-wrap">
+        <!-- LOGO - Hides after first message -->
+        <div id="tp-logo-wrap" class="tp-logo-wrap">
           <img 
             id="tp-logo" 
-            class="tp-logo"
+            class="tp-logo tp-logo-light"
             src="https://cdn.shopify.com/s/files/1/0705/7326/0982/files/ChatGPT_Image_Nov_5_2025_at_07_36_00_PM.png?v=1762400176"
             alt="Tiger Prompts">
+          <img 
+            id="tp-logo-dark" 
+            class="tp-logo tp-logo-dark"
+            src="https://cdn.shopify.com/s/files/1/0705/7326/0982/files/white-version-tiger-logo-half-half.png?v=1762551640"
+            alt="Tiger Prompts"
+            style="display: none;">
         </div>
         
-        <div class="tp-input-wrap">
-          <textarea 
-            id="tp-input" 
-            class="tp-input" 
-            placeholder="Enter your prompt... (Press Enter to enhance)"
-            rows="1"></textarea>
-          
-          <div class="tp-input-actions">
-            <button id="tp-mic" class="tp-mic" title="Voice Input (Coming Soon)">
-              <i class="fa-solid fa-microphone"></i>
-            </button>
-            
-            <button id="tp-send" class="tp-send" title="Enhance Prompt">
-              <i class="fa-solid fa-paper-plane"></i>
-            </button>
-          </div>
-          
-          <div id="tp-live-pqs" class="tp-live-pqs" style="display: none;">
-            PQS: --
-          </div>
-        </div>
-        
-        <div id="tp-vibe-coding-mode" class="tp-vibe-coding-mode" title="Click to toggle Vibe Coding Mode">
-          <div class="tp-vibe-toggle">
-            <div class="tp-vibe-toggle-knob"></div>
-          </div>
-          <div class="tp-vibe-label">
-            <div class="tp-vibe-label-main">
-              <i class="fa-solid fa-code"></i>
-              <span>Vibe Coding Mode</span>
-            </div>
-            <div class="tp-vibe-label-sub">
-              AI-powered coding assistance with radical transparency
-            </div>
-          </div>
-        </div>
-        
-        <div id="tp-vibe-context" class="tp-vibe-context" style="display: none;">
-          <div class="tp-context-header">
-            <i class="fa-solid fa-sliders"></i>
-            <span>Vibe Coding Context (Optional - for better results)</span>
-          </div>
-          
-          <div class="tp-context-body">
-            <div class="tp-context-field">
-              <label>File Names (comma-separated - e.g., app.js, styles.css, index.html):</label>
-              <input 
-                type="text" 
-                id="tp-file-defs" 
-                class="tp-context-input"
-                placeholder="tiger-prompts.js, tiger-prompts.css, tiger-prompts.liquid" />
-              <small style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block;">
-                AI will be instructed to never change these filenames
-              </small>
-            </div>
-            
-            <div class="tp-context-row">
-              <label class="tp-context-checkbox">
-                <input type="checkbox" id="tp-ctx-existing" />
-                <span>I'm modifying existing code</span>
-              </label>
-            </div>
-            
-            <textarea 
-              id="tp-ctx-code" 
-              class="tp-context-textarea"
-              placeholder="Paste your existing code here... (helps AI match your style and avoid breaking changes)"
-              style="display: none;"
-              rows="6"></textarea>
-            
-            <div class="tp-context-row tp-context-grid">
-              <div class="tp-context-field">
-                <label>Languages (select multiple):</label>
-                <select id="tp-ctx-language" class="tp-context-select" multiple size="3">
-                  <option value="javascript">JavaScript</option>
-                  <option value="typescript">TypeScript</option>
-                  <option value="react">React</option>
-                  <option value="vue">Vue</option>
-                  <option value="angular">Angular</option>
-                  <option value="python">Python</option>
-                  <option value="java">Java</option>
-                  <option value="csharp">C#</option>
-                  <option value="cpp">C++</option>
-                  <option value="php">PHP</option>
-                  <option value="ruby">Ruby</option>
-                  <option value="go">Go</option>
-                  <option value="rust">Rust</option>
-                  <option value="swift">Swift</option>
-                  <option value="kotlin">Kotlin</option>
-                  <option value="html">HTML</option>
-                  <option value="css">CSS</option>
-                  <option value="sql">SQL</option>
-                  <option value="liquid">Liquid</option>
-                </select>
-              </div>
-              
-              <div class="tp-context-field">
-                <label class="tp-context-checkbox">
-                  <input type="checkbox" id="tp-ctx-tests" />
-                  <span>Include test cases</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-        
+        <!-- RESULTS THREAD - Main focus -->
         <div id="tp-thread" class="tp-thread"></div>
         
-        <div class="tp-vibe-tools-section">
-          <div class="tp-vibe-tools-header">
-            <h3>
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
-              Vibe Coding Tools
-            </h3>
-            <p>AI-powered utilities to supercharge your development workflow</p>
-          </div>
-          
-          <div class="tp-vibe-tools-grid">
+        <!-- INPUT FIELD -->
+        <div class="tp-input-container">
+          <div class="tp-input-wrap">
+            <textarea 
+              id="tp-input" 
+              class="tp-input" 
+              placeholder="Message Tiger Prompts..."
+              rows="1"></textarea>
             
-            <div class="tp-vibe-tool" id="tp-tool-explainer">
-              <div class="tp-vibe-tool-icon">🔍</div>
-              <div class="tp-vibe-tool-content">
-                <h4>Code Explainer</h4>
-                <p>Get clear explanations of any code snippet</p>
-              </div>
-            </div>
-            
-            <div class="tp-vibe-tool" id="tp-tool-refactor">
-              <div class="tp-vibe-tool-icon">🔧</div>
-              <div class="tp-vibe-tool-content">
-                <h4>Refactor Advisor</h4>
-                <p>AI-powered improvement suggestions</p>
-              </div>
-            </div>
-            
-            <div class="tp-vibe-tool" id="tp-tool-bug-hunter">
-              <div class="tp-vibe-tool-icon">🐛</div>
-              <div class="tp-vibe-tool-content">
-                <h4>Bug Hunter</h4>
-                <p>Analyze code for potential issues</p>
-              </div>
-            </div>
-            
-            <div class="tp-vibe-tool" id="tp-tool-doc-gen">
-              <div class="tp-vibe-tool-icon">📝</div>
-              <div class="tp-vibe-tool-content">
-                <h4>Doc Generator</h4>
-                <p>Auto-generate documentation</p>
-              </div>
-            </div>
-            
-            <div class="tp-vibe-tool" id="tp-tool-test-writer">
-              <div class="tp-vibe-tool-icon">🧪</div>
-              <div class="tp-vibe-tool-content">
-                <h4>Test Writer</h4>
-                <p>Generate comprehensive test cases</p>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-        
-        <div id="tp-vibe-tool-modal" class="tp-vibe-tool-modal" style="display: none;">
-          <div class="tp-modal-overlay"></div>
-          <div class="tp-modal-content">
-            <div class="tp-modal-header">
-              <h3 id="tp-modal-title">Tool Name</h3>
-              <button id="tp-modal-close" class="tp-modal-close">
-                <i class="fa-solid fa-xmark"></i>
+            <div class="tp-input-actions">
+              <button id="tp-vibe-drawer-toggle" class="tp-vibe-cog" title="Vibe Coding Settings" style="display: none;">
+                <i class="fa-solid fa-sliders"></i>
+              </button>
+              
+              <button id="tp-voice" class="tp-voice" title="Voice Input (Coming Soon)">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+              
+              <button id="tp-send" class="tp-send" title="Send">
+                <i class="fa-solid fa-arrow-up"></i>
               </button>
             </div>
-            <div class="tp-modal-body">
-              <textarea 
-                id="tp-modal-input" 
-                class="tp-modal-textarea"
-                placeholder="Paste your code here..."
-                rows="12"></textarea>
-              <button id="tp-modal-submit" class="tp-btn tp-btn--orange tp-modal-submit">
-                <i class="fa-solid fa-paper-plane"></i>
-                Analyze Code
-              </button>
-            </div>
-            <div id="tp-modal-results" class="tp-modal-results" style="display: none;">
-              <div class="tp-modal-results-header">
-                <i class="fa-solid fa-check-circle"></i>
-                <span>Analysis Complete</span>
-              </div>
-              <div id="tp-modal-results-content" class="tp-modal-results-content"></div>
-            </div>
           </div>
         </div>
         
-        <div class="tp-validator-section">
-          <div class="tp-validator-header">
-            <h3>
-              <i class="fa-solid fa-shield-check"></i>
-              AI Response Validator
-            </h3>
-            <p>Paste the code your AI generated to check for common issues (truncation, missing imports, etc.)</p>
-          </div>
-          
-          <textarea 
-            id="tp-validate-input" 
-            class="tp-validate-input"
-            placeholder="Paste the code Claude/ChatGPT gave you here..."
-            rows="10"></textarea>
-          
-          <button id="tp-validate-btn" class="tp-btn tp-btn--orange tp-validate-btn">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            Check Code Quality
-          </button>
-          
-          <div id="tp-validate-results" class="tp-validate-results" style="display: none;">
-          </div>
-        </div>
-        
+        <!-- FOOTER -->
         <footer class="tp-footer">
           <div class="tp-footer-content">
             <div id="tp-status-indicator" class="tp-status-indicator ready">
               ✅ Ready
-            </div>
-            <div class="tp-footer-branding">
-              Powered by <a href="https://autophage.ai" target="_blank" rel="noopener">Autophage.ai</a>
             </div>
           </div>
         </footer>
@@ -373,17 +222,84 @@
   </div>
 </section>
 
+<!-- VIBE CODING DRAWER -->
+<div id="tp-vibe-drawer" class="tp-vibe-drawer">
+  <div class="tp-drawer-overlay"></div>
+  <div class="tp-drawer-content">
+    <div class="tp-drawer-header">
+      <h3>
+        <i class="fa-solid fa-code"></i>
+        Vibe Coding Context
+      </h3>
+      <button id="tp-drawer-close" class="tp-drawer-close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    
+    <div class="tp-drawer-body">
+      <div class="tp-context-field">
+        <label>File Names (comma-separated):</label>
+        <input 
+          type="text" 
+          id="tp-file-defs" 
+          class="tp-context-input"
+          placeholder="tiger-prompts.js, tiger-prompts.css, tiger-prompts.liquid" />
+      </div>
+      
+      <div class="tp-context-row">
+        <label class="tp-context-checkbox">
+          <input type="checkbox" id="tp-ctx-existing" />
+          <span>I'm modifying existing code</span>
+        </label>
+      </div>
+      
+      <textarea 
+        id="tp-ctx-code" 
+        class="tp-context-textarea"
+        placeholder="Paste your existing code here..."
+        style="display: none;"
+        rows="6"></textarea>
+      
+      <div class="tp-context-languages">
+        <label class="tp-context-label">Languages:</label>
+        <div class="tp-language-grid">
+          <label class="tp-language-checkbox"><input type="checkbox" value="javascript" /> JavaScript</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="typescript" /> TypeScript</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="react" /> React</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="vue" /> Vue</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="python" /> Python</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="java" /> Java</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="csharp" /> C#</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="php" /> PHP</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="ruby" /> Ruby</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="go" /> Go</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="html" /> HTML</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="css" /> CSS</label>
+          <label class="tp-language-checkbox"><input type="checkbox" value="liquid" /> Liquid</label>
+        </div>
+      </div>
+      
+      <div class="tp-context-row">
+        <label class="tp-context-checkbox">
+          <input type="checkbox" id="tp-ctx-tests" />
+          <span>Include test cases</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% schema %}
 {
-  "name": "Tiger Prompts",
+  "name": "Tiger Prompts v10",
   "settings": [
     {
       "type": "header",
-      "content": "Tiger Prompts v9.0 Settings"
+      "content": "Tiger Prompts v10 Settings"
     },
     {
       "type": "paragraph",
-      "content": "Enhanced with LLM Agent Mode and Vibe Coding Tools"
+      "content": "Production-ready with vibe drawer, orange theme, and run button"
     },
     {
       "type": "text",
@@ -391,12 +307,6 @@
       "label": "Section Title",
       "default": "Tiger Prompts",
       "info": "Internal reference for section"
-    },
-    {
-      "type": "text",
-      "id": "openai_api_key",
-      "label": "OpenAI API Key",
-      "info": "Your OpenAI API key for LLM Agent Mode"
     },
     {
       "type": "checkbox",
@@ -409,7 +319,7 @@
       "type": "checkbox",
       "id": "dark_mode",
       "label": "Enable Dark Mode by Default",
-      "default": false,
+      "default": true,
       "info": "Start with dark theme enabled"
     },
     {
@@ -418,13 +328,6 @@
       "label": "Show PQS Scores by Default",
       "default": true,
       "info": "Display Prompt Quality Scores"
-    },
-    {
-      "type": "checkbox",
-      "id": "llm_agent_default",
-      "label": "Enable LLM Agent Mode by Default",
-      "default": true,
-      "info": "Use OpenAI for prompt enhancement"
     },
     {
       "type": "header",
@@ -443,7 +346,7 @@
   ],
   "presets": [
     {
-      "name": "Tiger Prompts v9.0",
+      "name": "Tiger Prompts v10",
       "category": "Custom"
     }
   ]
