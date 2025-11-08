@@ -1,32 +1,11 @@
 {% comment %}
-  Tiger Prompts v11.5 — COMPREHENSIVE FIX
+  Tiger Prompts v12.1 — CODING AI SELECTOR
   
-  FIXED in v11.5:
-  - Font Awesome loading with multiple fallbacks
-  - Icon rendering completely fixed
-  - Input bar fully visible and functional
-  - All buttons displaying properly
-  - Preload critical resources
+  NEW in v12.1:
+  - Separate dropdown for "Which AI are you coding with?"
+  - Coding AI tips injection (Claude, GPT-5, Cursor, etc.)
+  - Standardized tooltips
 {% endcomment %}
-
-<!-- CRITICAL: Font Awesome with fallbacks -->
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-
-<!-- Fallback Font Awesome from jsdelivr -->
-<script>
-  document.fonts.ready.then(function() {
-    // Check if Font Awesome loaded
-    if (!document.fonts.check('12px "Font Awesome 6 Free"')) {
-      console.warn('[TigerPrompts] Font Awesome primary CDN failed, loading backup...');
-      var link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css';
-      document.head.appendChild(link);
-    }
-  });
-</script>
 
 {{ 'tiger-prompts.css' | asset_url | stylesheet_tag }}
 {{ 'tiger-prompts.js' | asset_url | script_tag }}
@@ -49,7 +28,7 @@
           id="tp-sidebar-toggle" 
           class="tp-iconbtn" 
           title="Collapse sidebar">
-          <i class="fa-solid fa-chevron-left"></i>
+          <span class="tp-icon">◀</span>
         </button>
       </div>
       
@@ -58,14 +37,14 @@
         <div class="tp-nav-section">
           <div class="tp-nav-title">
             Vibe Coding
-            <i class="fa-solid fa-info-circle tp-tooltip" data-tooltip="Perfect for development work! Track files, tech stack, and code context so AI understands your project structure and coding patterns"></i>
+            <span class="tp-tooltip" data-tooltip="Perfect for development work! Track files, tech stack, and code context so AI understands your project structure and coding patterns">ⓘ</span>
           </div>
           
           <div class="tp-toggle-item tp-toggle-vibe" id="tp-vibe-coding-toggle">
             <div class="tp-toggle-content">
-              <i class="fa-solid fa-code"></i>
+              <span class="tp-icon">💻</span>
               <span>Vibe Coding Mode</span>
-              <i class="fa-solid fa-circle-question tp-tooltip-inline" data-tooltip="Enable this when working on code. Opens context drawer to define files, languages, and existing code"></i>
+              <span class="tp-tooltip" data-tooltip="Enable this when working on code. Opens context drawer to define files, languages, and existing code">ⓘ</span>
             </div>
             <div class="tp-toggle-switch">
               <div class="tp-toggle-knob"></div>
@@ -76,13 +55,13 @@
         <div class="tp-nav-section">
           <div class="tp-nav-title">
             Enhancement Engine
-            <i class="fa-solid fa-info-circle tp-tooltip" data-tooltip="Control how your prompts are enhanced. LLM mode uses OpenAI for smart improvements. Choose depth based on task complexity"></i>
+            <span class="tp-tooltip" data-tooltip="Control how your prompts are enhanced. LLM mode uses OpenAI for smart improvements. Choose depth based on task complexity">ⓘ</span>
           </div>
           
           <div class="tp-field-group">
             <label class="tp-field-label">
               Enhancement Depth
-              <i class="fa-solid fa-circle-question tp-tooltip-inline" data-tooltip="Light: Quick polish for simple tasks. Deep: Full restructuring for complex projects. Use Deep for coding sessions!"></i>
+              <span class="tp-tooltip" data-tooltip="Light: Quick polish for simple tasks. Deep: Full restructuring for complex projects. Use Deep for coding sessions!">ⓘ</span>
             </label>
             <select id="tp-enhancement-depth" class="tp-select">
               <option value="light" selected>✨ Light (Quick Polish)</option>
@@ -92,9 +71,9 @@
           
           <div class="tp-toggle-item tp-toggle-orange" id="tp-auto-run-toggle">
             <div class="tp-toggle-content">
-              <i class="fa-solid fa-play"></i>
+              <span class="tp-icon">▶</span>
               <span>Auto-Run Prompts</span>
-              <i class="fa-solid fa-circle-question tp-tooltip-inline" data-tooltip="Automatically execute enhanced prompts through your selected LLM. Turn OFF if you want to review before running"></i>
+              <span class="tp-tooltip" data-tooltip="Automatically execute enhanced prompts through your selected LLM. Turn OFF if you want to review before running">ⓘ</span>
             </div>
             <div class="tp-toggle-switch">
               <div class="tp-toggle-knob"></div>
@@ -104,10 +83,8 @@
           
           <div class="tp-field-group">
             <label class="tp-field-label">
-              LLM Selection
-              <button id="tp-model-guide-btn" class="tp-model-guide-btn" title="View model comparison guide">
-                <i class="fa-solid fa-info-circle"></i>
-              </button>
+              AI Agent Enhancer
+              <span class="tp-tooltip" data-tooltip="This AI will ENHANCE your prompt (not do the actual coding). The coding AI is set in Vibe Coding settings.">ⓘ</span>
             </label>
             <select id="tp-llm-select" class="tp-select">
               <option value="gpt-4o-mini">ChatGPT 4o-mini</option>
@@ -120,15 +97,15 @@
           
           <details class="tp-advanced-settings">
             <summary class="tp-advanced-summary">
-              <i class="fa-solid fa-gear"></i>
+              <span class="tp-icon">⚙</span>
               Advanced Settings
             </summary>
             <div class="tp-advanced-content">
               <div class="tp-toggle-item tp-toggle-orange" id="tp-llm-toggle">
                 <div class="tp-toggle-content">
-                  <i class="fa-solid fa-robot"></i>
+                  <span class="tp-icon">🤖</span>
                   <span>LLM Agent Mode</span>
-                  <i class="fa-solid fa-circle-question tp-tooltip-inline" data-tooltip="Use OpenAI API for enhancement. Turn OFF for offline local mode (less powerful but works without internet)"></i>
+                  <span class="tp-tooltip" data-tooltip="Use OpenAI API for enhancement. Turn OFF for offline local mode (less powerful but works without internet)">ⓘ</span>
                 </div>
                 <div class="tp-toggle-switch">
                   <div class="tp-toggle-knob"></div>
@@ -142,31 +119,31 @@
         <div class="tp-nav-section">
           <div class="tp-nav-title">
             Display
-            <i class="fa-solid fa-info-circle tp-tooltip" data-tooltip="Control what information is shown in your enhancement results"></i>
+            <span class="tp-tooltip" data-tooltip="Control what information is shown in your enhancement results">ⓘ</span>
           </div>
           <button id="tp-explain-toggle" class="tp-btn tp-btn--ghost">
-            <i class="fa-solid fa-graduation-cap"></i>
+            <span class="tp-icon">🎓</span>
             <span>Show Explanations</span>
-            <i class="fa-solid fa-circle-question tp-tooltip-inline" data-tooltip="Show detailed breakdown of what was improved in your prompt. Great for learning!"></i>
+            <span class="tp-tooltip" data-tooltip="Show detailed breakdown of what was improved in your prompt. Great for learning!">ⓘ</span>
           </button>
           <button id="tp-pqs-toggle" class="tp-btn tp-btn--ghost">
-            <i class="fa-solid fa-chart-line"></i>
+            <span class="tp-icon">📊</span>
             <span>Show PQS Score</span>
-            <i class="fa-solid fa-circle-question tp-tooltip-inline" data-tooltip="Display Prompt Quality Score - a metric showing how well-structured your prompt is (0-1 scale)"></i>
+            <span class="tp-tooltip" data-tooltip="Display Prompt Quality Score - a metric showing how well-structured your prompt is (0-1 scale)">ⓘ</span>
           </button>
         </div>
         
         <div class="tp-nav-section">
           <div class="tp-nav-title">
             Settings
-            <i class="fa-solid fa-info-circle tp-tooltip" data-tooltip="Customize your Tiger Prompts experience"></i>
+            <span class="tp-tooltip" data-tooltip="Customize your Tiger Prompts experience">ⓘ</span>
           </div>
           <button id="tp-theme-toggle" class="tp-btn tp-btn--ghost">
-            <i class="fa-solid fa-moon"></i>
+            <span class="tp-icon">🌙</span>
             <span>Toggle Theme</span>
           </button>
           <button id="tp-reset" class="tp-btn tp-btn--ghost">
-            <i class="fa-solid fa-rotate-left"></i>
+            <span class="tp-icon">↺</span>
             <span>Clear History</span>
           </button>
         </div>
@@ -174,7 +151,7 @@
         <div class="tp-nav-section tp-nav-section--saved">
           <div class="tp-nav-title">
             Saved Prompts
-            <i class="fa-solid fa-info-circle tp-tooltip" data-tooltip="Access your bookmarked enhanced prompts. Click any saved prompt to load it back into the input"></i>
+            <span class="tp-tooltip" data-tooltip="Access your bookmarked enhanced prompts. Click any saved prompt to load it back into the input">ⓘ</span>
           </div>
           <div id="tp-saved-list" class="tp-saved-list">
             <div class="tp-saved-empty">No saved prompts yet</div>
@@ -184,7 +161,7 @@
       </nav>
       
       <button id="tp-collapse-tab" class="tp-collapse-tab" title="Expand sidebar">
-        <i class="fa-solid fa-chevron-right"></i>
+        <span class="tp-icon">▶</span>
       </button>
       
     </aside>
@@ -212,7 +189,7 @@
           <div class="tp-pathway-icon"></div>
           <div class="tp-pathway-text"></div>
           <button class="tp-pathway-close">
-            <i class="fa-solid fa-xmark"></i>
+            <span class="tp-icon">✕</span>
           </button>
         </div>
         
@@ -222,9 +199,9 @@
             <p class="tp-welcome-subtitle">Transform prompts into powerful AI instructions</p>
             <div class="tp-welcome-flow">
               <span class="tp-flow-step">✨ Enhance</span>
-              <i class="fa-solid fa-arrow-right"></i>
+              <span class="tp-icon">→</span>
               <span class="tp-flow-step">📋 Copy</span>
-              <i class="fa-solid fa-arrow-right"></i>
+              <span class="tp-icon">→</span>
               <span class="tp-flow-step">🚀 Run</span>
             </div>
           </div>
@@ -321,15 +298,15 @@
             
             <div class="tp-input-actions">
               <button id="tp-vibe-drawer-toggle" class="tp-vibe-cog" title="Vibe Coding Settings" style="display: none;">
-                <i class="fa-solid fa-sliders"></i>
+                <span class="tp-icon">⚙</span>
               </button>
               
               <button id="tp-voice" class="tp-voice" title="Voice Input (Coming Soon)">
-                <i class="fa-solid fa-microphone"></i>
+                <span class="tp-icon">🎤</span>
               </button>
               
               <button id="tp-send" class="tp-send" title="Send">
-                <i class="fa-solid fa-arrow-up"></i>
+                <span class="tp-icon">↑</span>
               </button>
             </div>
           </div>
@@ -356,11 +333,11 @@
   <div class="tp-modal-content tp-model-modal">
     <div class="tp-modal-header">
       <h3>
-        <i class="fa-solid fa-robot"></i>
+        <span class="tp-icon">🤖</span>
         Model Comparison Guide
       </h3>
       <button id="tp-model-guide-close" class="tp-modal-close">
-        <i class="fa-solid fa-xmark"></i>
+        <span class="tp-icon">✕</span>
       </button>
     </div>
     <div class="tp-modal-body">
@@ -463,21 +440,37 @@
   </div>
 </div>
 
-<!-- VIBE CODING DRAWER - FIXED LAYOUT -->
+<!-- VIBE CODING DRAWER - WITH CODING AI SELECTOR -->
 <div id="tp-vibe-drawer" class="tp-vibe-drawer">
   <div class="tp-drawer-overlay"></div>
   <div class="tp-drawer-content">
     <div class="tp-drawer-header">
       <h3>
-        <i class="fa-solid fa-code"></i>
+        <span class="tp-icon">💻</span>
         Vibe Coding Context
       </h3>
       <button id="tp-drawer-close" class="tp-drawer-close">
-        <i class="fa-solid fa-xmark"></i>
+        <span class="tp-icon">✕</span>
       </button>
     </div>
     
     <div class="tp-drawer-body">
+      
+      <!-- NEW: CODING AI SELECTOR -->
+      <div class="tp-context-field">
+        <label>
+          Which AI are you coding with?
+          <span class="tp-tooltip" data-tooltip="Select the AI you'll use for ACTUAL CODING (not prompt enhancement). We'll inject optimization tips specific to this AI.">ⓘ</span>
+        </label>
+        <select id="tp-coding-ai-select" class="tp-context-input" style="cursor: pointer;">
+          <option value="claude-sonnet">Claude Sonnet</option>
+          <option value="gpt-5">GPT-5 / ChatGPT</option>
+          <option value="cursor">Cursor</option>
+          <option value="github-copilot">GitHub Copilot</option>
+          <option value="windsurf">Windsurf</option>
+        </select>
+      </div>
+      
       <div class="tp-context-field">
         <label>File Names (comma-separated):</label>
         <input 
@@ -531,7 +524,7 @@
     <!-- ACTIONS MOVED OUTSIDE SCROLLABLE BODY -->
     <div class="tp-drawer-actions">
       <button id="tp-drawer-save" class="tp-drawer-save-btn">
-        <i class="fa-solid fa-check"></i>
+        <span class="tp-icon">✓</span>
         Save & Continue
       </button>
     </div>
@@ -540,15 +533,15 @@
 
 {% schema %}
 {
-  "name": "Tiger Prompts v11.5",
+  "name": "Tiger Prompts v12.1",
   "settings": [
     {
       "type": "header",
-      "content": "Tiger Prompts v11.5 - COMPREHENSIVE FIX"
+      "content": "Tiger Prompts v12.1 - CODING AI SELECTOR"
     },
     {
       "type": "paragraph",
-      "content": "Fixed: All icons rendering properly, input bar fully visible, Font Awesome loading with fallbacks"
+      "content": "New: Select which AI you're coding with for optimized tips"
     },
     {
       "type": "text",
@@ -595,7 +588,7 @@
   ],
   "presets": [
     {
-      "name": "Tiger Prompts v11.5",
+      "name": "Tiger Prompts v12.1",
       "category": "Custom"
     }
   ]
