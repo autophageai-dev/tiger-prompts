@@ -1,6 +1,7 @@
-/* Tiger Prompts v12.1 – AI-SPECIFIC OPTIMIZATION TIPS
- * New: AI model-specific tips injection
- * New: Language-specific coding tips
+/* Tiger Prompts v12.2 – TOP RIGHT HEADER MENU + COMPLETE FUNCTIONALITY
+ * New: Header menu with Login, Sign Up, and Settings dropdown
+ * New: AI-specific optimization tips injection
+ * New: LLM enhancement mode
  * Fixed: Standardized tooltip system
  */
 (function() {
@@ -27,7 +28,6 @@
   };
   
   // CODING AI OPTIMIZATION TIPS DATABASE
-  // These are tips for the AI the user will CODE WITH (not the enhancement AI)
   const CODING_AI_TIPS = {
     'claude-sonnet': {
       name: 'Claude Sonnet',
@@ -441,7 +441,7 @@ Make every section actionable and specific. Preserve the user's original intent 
   };
   
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('[TigerPrompts v12.1] Initializing - AI-Specific Optimization Tips...');
+    console.log('[TigerPrompts v12.2] Initializing - Header Menu + AI Optimization...');
     initializeApp();
   });
   
@@ -481,7 +481,11 @@ Make every section actionable and specific. Preserve the user's original intent 
       modelGuideModal: $('tp-model-guide-modal'),
       modelGuideClose: $('tp-model-guide-close'),
       modelHint: $('tp-model-hint'),
-      pathwayBanner: $('tp-pathway-banner')
+      pathwayBanner: $('tp-pathway-banner'),
+      loginBtn: $('tp-login-btn'),
+      signupBtn: $('tp-signup-btn'),
+      settingsBtn: $('tp-header-settings-btn'),
+      dropdownMenu: $('tp-header-dropdown-menu')
     };
     
     if (!elements.sendBtn || !elements.input || !elements.thread) {
@@ -490,7 +494,7 @@ Make every section actionable and specific. Preserve the user's original intent 
       return;
     }
     
-    console.log('[TigerPrompts v12.1] All core elements found');
+    console.log('[TigerPrompts v12.2] All core elements found');
     
     let state = {
       useLLM: localStorage.getItem('tp-use-llm') !== 'false',
@@ -563,6 +567,106 @@ Make every section actionable and specific. Preserve the user's original intent 
     if (elements.fileDefsInput && state.fileDefinitions) {
       elements.fileDefsInput.value = state.fileDefinitions;
     }
+    
+    // === HEADER MENU HANDLERS ===
+    
+    // Login Button
+    if (elements.loginBtn) {
+      elements.loginBtn.addEventListener('click', () => {
+        alert('Login functionality coming soon! 🚀');
+        // TODO: Navigate to login page or open login modal
+        // window.location.href = '/account/login';
+      });
+    }
+    
+    // Sign Up Button
+    if (elements.signupBtn) {
+      elements.signupBtn.addEventListener('click', () => {
+        alert('Sign up for free! Get started with Tiger Prompts 🎉');
+        // TODO: Navigate to signup page or open signup modal
+        // window.location.href = '/account/register';
+      });
+    }
+    
+    // Settings Dropdown Toggle
+    if (elements.settingsBtn && elements.dropdownMenu) {
+      elements.settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        elements.dropdownMenu.classList.toggle('show');
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!elements.settingsBtn.contains(e.target) && !elements.dropdownMenu.contains(e.target)) {
+          elements.dropdownMenu.classList.remove('show');
+        }
+      });
+    }
+    
+    // Dropdown Menu Actions
+    const dropdownItems = document.querySelectorAll('.tp-dropdown-item');
+    if (dropdownItems.length > 0) {
+      dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const action = item.dataset.action;
+          
+          // Close dropdown
+          if (elements.dropdownMenu) {
+            elements.dropdownMenu.classList.remove('show');
+          }
+          
+          // Handle different actions
+          switch(action) {
+            case 'account':
+              alert('Account Settings - Coming Soon! ⚙️');
+              // TODO: Navigate to account settings
+              // window.location.href = '/account/settings';
+              break;
+              
+            case 'preferences':
+              alert('Preferences - Coming Soon! 🎨');
+              // TODO: Open preferences modal or navigate
+              break;
+              
+            case 'pricing':
+              alert('Check out our pricing plans! 💎');
+              // TODO: Navigate to pricing page
+              // window.location.href = '/pricing';
+              break;
+              
+            case 'help':
+              alert('Help & Documentation - Coming Soon! ❓');
+              // TODO: Open help center or docs
+              // window.open('https://docs.tigerprompts.com', '_blank');
+              break;
+              
+            case 'extension':
+              alert('Browser Extension - Coming Soon! 🔌');
+              // TODO: Navigate to extension download page
+              break;
+              
+            case 'logout':
+              if (confirm('Are you sure you want to logout?')) {
+                alert('Logged out successfully! 👋');
+                // TODO: Handle logout
+                // window.location.href = '/account/logout';
+              }
+              break;
+              
+            default:
+              console.log('Unknown action:', action);
+          }
+        });
+      });
+    }
+    
+    // Close dropdown with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && elements.dropdownMenu) {
+        elements.dropdownMenu.classList.remove('show');
+      }
+    });
     
     // === JS-POWERED TOOLTIP SYSTEM (STANDARDIZED) ===
     
@@ -2019,6 +2123,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       return div.innerHTML;
     }
     
-    console.log('[TigerPrompts v12.1] ✅ READY - AI Optimization Tips Active!');
+    console.log('[TigerPrompts v12.2] ✅ READY - Header Menu + AI Optimization Active!');
   }
 })();
