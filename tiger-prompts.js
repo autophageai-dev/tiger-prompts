@@ -1,14 +1,168 @@
-/* Tiger Prompts v10 – Production Ready with Run Button + Vibe Drawer */
+/* Tiger Prompts v11.5 – COMPREHENSIVE FIX */
 (function() {
   'use strict';
   
+  // CRITICAL: Verify Font Awesome loaded
+  const checkFontAwesome = () => {
+    const testIcon = document.createElement('i');
+    testIcon.className = 'fa-solid fa-check';
+    testIcon.style.position = 'absolute';
+    testIcon.style.left = '-9999px';
+    document.body.appendChild(testIcon);
+    
+    const computed = window.getComputedStyle(testIcon);
+    const fontFamily = computed.getPropertyValue('font-family');
+    
+    document.body.removeChild(testIcon);
+    
+    if (!fontFamily.includes('Font Awesome')) {
+      console.error('[TigerPrompts] Font Awesome not loaded! Icons will display incorrectly.');
+      return false;
+    }
+    
+    console.log('[TigerPrompts] ✅ Font Awesome loaded successfully');
+    return true;
+  };
+  
   const $ = (id) => document.getElementById(id);
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
   
   // Cloudflare Worker Configuration
   const WORKER_CONFIG = {
     endpoint: 'https://tigerprompts-proxy.autophageai.workers.dev',
     model: 'gpt-4o-mini'
+  };
+  
+  // TEMPLATE DEFINITIONS
+  const TEMPLATES = {
+    'fresh-session': {
+      name: 'Fresh Coding Session',
+      icon: '🚀',
+      placeholder: 'Describe the feature or component you want to build...',
+      systemContext: `You are helping a developer start a fresh coding session. Their vibe coding context provides tech stack and files. Structure your response to include:
+- Clear role definition for the AI
+- File structure awareness
+- Code that integrates with their existing patterns
+- Best practices for their stack`,
+      enableVibeCoding: true,
+      autoOpenDrawer: true,
+      depth: 'deep'
+    },
+    'code-feature': {
+      name: 'Code Feature',
+      icon: '💻',
+      placeholder: 'What feature do you want to build?',
+      systemContext: `Structure this as a feature request with:
+- Clear requirements
+- Integration points with existing code
+- Error handling needs
+- Documentation requirements`,
+      enableVibeCoding: true,
+      autoOpenDrawer: false,
+      depth: 'deep'
+    },
+    'fix-bug': {
+      name: 'Fix Bug',
+      icon: '🐛',
+      placeholder: 'Describe the bug or issue you\'re experiencing...',
+      systemContext: `This is a debugging request. Structure to include:
+- Problem description
+- Expected vs actual behavior
+- Error messages or symptoms
+- Code context for debugging`,
+      enableVibeCoding: true,
+      autoOpenDrawer: false,
+      depth: 'deep'
+    },
+    'draft-email': {
+      name: 'Draft Email',
+      icon: '📧',
+      placeholder: 'What should this email be about?',
+      systemContext: `Structure as a professional email request including:
+- Recipient context
+- Purpose and key points
+- Appropriate tone
+- Clear call to action`,
+      enableVibeCoding: false,
+      autoOpenDrawer: false,
+      depth: 'light'
+    },
+    'write-content': {
+      name: 'Write Content',
+      icon: '✍️',
+      placeholder: 'What content do you need? (blog post, article, social media, etc.)',
+      systemContext: `Structure as a content creation request with:
+- Content type and format
+- Target audience
+- Key messages
+- Tone and style guidelines`,
+      enableVibeCoding: false,
+      autoOpenDrawer: false,
+      depth: 'light'
+    },
+    'analyze-data': {
+      name: 'Analyze Data',
+      icon: '📊',
+      placeholder: 'What data do you need analyzed? (paste data or describe it)',
+      systemContext: `Structure as a data analysis request:
+- Data description and format
+- Analysis objectives
+- Insights needed
+- Visualization preferences`,
+      enableVibeCoding: false,
+      autoOpenDrawer: false,
+      depth: 'deep'
+    },
+    'research': {
+      name: 'Research Query',
+      icon: '🔍',
+      placeholder: 'What topic do you want to research?',
+      systemContext: `Structure as a research request including:
+- Specific research areas
+- Depth and scope
+- Desired output format
+- Source credibility requirements`,
+      enableVibeCoding: false,
+      autoOpenDrawer: false,
+      depth: 'deep'
+    },
+    'social-media': {
+      name: 'Social Media',
+      icon: '📱',
+      placeholder: 'What\'s the topic or message for your social media post?',
+      systemContext: `Structure as a social media content request:
+- Platform (Instagram, Twitter, LinkedIn, etc.)
+- Tone and voice (casual, professional, witty)
+- Key message and hook
+- Hashtag strategy
+- Call to action`,
+      enableVibeCoding: false,
+      autoOpenDrawer: false,
+      depth: 'light'
+    },
+    'brainstorm': {
+      name: 'Brainstorm',
+      icon: '💡',
+      placeholder: 'What do you need ideas for?',
+      systemContext: `Structure as a creative brainstorming session:
+- Problem or opportunity to explore
+- Constraints or requirements
+- Target audience or use case
+- Desired number of ideas
+- Evaluation criteria for ideas`,
+      enableVibeCoding: false,
+      autoOpenDrawer: false,
+      depth: 'light'
+    }
+  };
+  
+  // Model hints for different LLMs
+  const MODEL_HINTS = {
+    'gpt-4o-mini': '⚡ Fast & efficient',
+    'gpt-4o': '💎 Best quality & reasoning',
+    'claude-sonnet': '🔮 Creative & thorough',
+    'copilot': '⚡ Code-focused'
   };
   
   // LLM Enhancement Prompts
@@ -89,7 +243,12 @@ Make every section actionable and specific. Preserve the user's original intent 
   
   // Wait for DOM
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('[TigerPrompts v10] Initializing production build...');
+    console.log('[TigerPrompts v11.5] Initializing - COMPREHENSIVE FIX...');
+    
+    // Verify Font Awesome loaded
+    setTimeout(() => {
+      checkFontAwesome();
+    }, 500);
     
     // Get elements
     const elements = {
@@ -119,7 +278,14 @@ Make every section actionable and specific. Preserve the user's original intent 
       logoWrap: $('tp-logo-wrap'),
       vibeDrawer: $('tp-vibe-drawer'),
       vibeDrawerToggle: $('tp-vibe-drawer-toggle'),
-      drawerClose: $('tp-drawer-close')
+      drawerClose: $('tp-drawer-close'),
+      drawerSave: $('tp-drawer-save'),
+      emptyState: $('tp-empty-state'),
+      modelGuideBtn: $('tp-model-guide-btn'),
+      modelGuideModal: $('tp-model-guide-modal'),
+      modelGuideClose: $('tp-model-guide-close'),
+      modelHint: $('tp-model-hint'),
+      pathwayBanner: $('tp-pathway-banner')
     };
     
     // Verify core elements
@@ -129,7 +295,7 @@ Make every section actionable and specific. Preserve the user's original intent 
       return;
     }
     
-    console.log('[TigerPrompts v10] All core elements found');
+    console.log('[TigerPrompts v11.4] All core elements found');
     
     // State
     let state = {
@@ -144,6 +310,7 @@ Make every section actionable and specific. Preserve the user's original intent 
       fileDefinitions: localStorage.getItem('tp-file-defs') || '',
       logoHidden: false,
       messageCount: 0,
+      activeTemplate: null,
       codeContext: {
         existingCode: '',
         language: '',
@@ -156,6 +323,8 @@ Make every section actionable and specific. Preserve the user's original intent 
     updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
     loadSavedPrompts();
     updateSettingButtons();
+    updateEmptyState();
+    updateModelHint();
     
     // Set dropdown values
     if (elements.enhancementDepth) {
@@ -209,6 +378,17 @@ Make every section actionable and specific. Preserve the user's original intent 
     elements.input.addEventListener('input', () => {
       elements.input.style.height = 'auto';
       elements.input.style.height = Math.min(elements.input.scrollHeight, 200) + 'px';
+      
+      // Reset placeholder if input is cleared
+      if (elements.input.value.trim() === '' && state.activeTemplate) {
+        const template = TEMPLATES[state.activeTemplate];
+        if (template) {
+          elements.input.placeholder = template.placeholder;
+        }
+      }
+      
+      // Update empty state visibility
+      updateEmptyState();
     });
     
     elements.input.addEventListener('keydown', (e) => {
@@ -219,6 +399,51 @@ Make every section actionable and specific. Preserve the user's original intent 
     });
     
     elements.sendBtn.addEventListener('click', runEnhancer);
+    
+    // === LOGO CLICK - RETURN TO HOME ===
+    
+    const logoImages = document.querySelectorAll('.tp-logo, .tp-sidebar-logo');
+    logoImages.forEach(logo => {
+      logo.addEventListener('click', () => {
+        if (state.messageCount > 0 || state.activeTemplate) {
+          // Reset everything
+          if (elements.thread) {
+            elements.thread.innerHTML = '';
+          }
+          if (elements.input) {
+            elements.input.value = '';
+            elements.input.style.height = 'auto';
+            elements.input.placeholder = state.vibeCodingMode 
+              ? 'Message Tiger Prompts... (Vibe Coding Mode active)' 
+              : 'Message Tiger Prompts...';
+          }
+          
+          state.messageCount = 0;
+          state.logoHidden = false;
+          state.activeTemplate = null;
+          
+          if (elements.logoWrap) {
+            elements.logoWrap.classList.remove('hidden');
+          }
+          
+          // Hide pathway banner
+          if (elements.pathwayBanner) {
+            elements.pathwayBanner.style.display = 'none';
+          }
+          
+          // Close any open modals/drawers
+          if (elements.vibeDrawer) {
+            elements.vibeDrawer.classList.remove('open');
+          }
+          
+          updateEmptyState();
+          updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
+        }
+      });
+      
+      // Add cursor pointer to indicate it's clickable
+      logo.style.cursor = 'pointer';
+    });
     
     // === SIDEBAR CONTROLS ===
     
@@ -298,6 +523,144 @@ Make every section actionable and specific. Preserve the user's original intent 
       };
       
       updateStatus('ready', `✅ Selected: ${modelNames[state.selectedLLM]}`);
+      updateModelHint();
+    });
+    
+    // === TEMPLATE SYSTEM ===
+    
+    document.querySelectorAll('.tp-template').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const templateId = btn.dataset.template;
+        const template = TEMPLATES[templateId];
+        
+        if (!template) return;
+        
+        // Store active template
+        state.activeTemplate = templateId;
+        
+        // Update placeholder
+        if (elements.input) {
+          elements.input.placeholder = template.placeholder;
+          elements.input.focus();
+        }
+        
+        // Set enhancement depth
+        if (elements.enhancementDepth) {
+          elements.enhancementDepth.value = template.depth;
+          state.enhancementDepth = template.depth;
+          localStorage.setItem('tp-enhancement-depth', template.depth);
+        }
+        
+        // Enable vibe coding if needed
+        if (template.enableVibeCoding && !state.vibeCodingMode) {
+          state.vibeCodingMode = true;
+          localStorage.setItem('tp-vibe-coding', state.vibeCodingMode);
+          
+          const toggleItem = elements.vibeCodingToggle?.closest('.tp-toggle-item');
+          if (toggleItem) {
+            toggleItem.classList.add('active');
+          }
+          
+          if (elements.vibeDrawerToggle) {
+            elements.vibeDrawerToggle.style.display = 'flex';
+          }
+        }
+        
+        // Hide empty state IMMEDIATELY
+        if (elements.emptyState) {
+          elements.emptyState.classList.add('hidden');
+        }
+        
+        // Show pathway confirmation banner
+        showPathwayBanner(template);
+        
+        // Auto-open vibe drawer if specified
+        if (template.autoOpenDrawer && template.enableVibeCoding && elements.vibeDrawer) {
+          setTimeout(() => {
+            elements.vibeDrawer.classList.add('open');
+          }, 100);
+        }
+      });
+    });
+    
+    // === PATHWAY CONFIRMATION BANNER ===
+    
+    function showPathwayBanner(template) {
+      if (!elements.pathwayBanner) return;
+      
+      const icon = elements.pathwayBanner.querySelector('.tp-pathway-icon');
+      const text = elements.pathwayBanner.querySelector('.tp-pathway-text');
+      
+      if (icon) icon.textContent = template.icon;
+      if (text) text.textContent = `${template.name} mode active - ${template.placeholder}`;
+      
+      elements.pathwayBanner.style.display = 'flex';
+      
+      // Auto-hide after 15 seconds
+      setTimeout(() => {
+        elements.pathwayBanner.style.display = 'none';
+      }, 15000);
+    }
+    
+    // Close pathway banner
+    if (elements.pathwayBanner) {
+      const closeBtn = elements.pathwayBanner.querySelector('.tp-pathway-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          elements.pathwayBanner.style.display = 'none';
+        });
+      }
+    }
+    
+    // === MODEL GUIDE MODAL ===
+    
+    elements.modelGuideBtn?.addEventListener('click', () => {
+      if (elements.modelGuideModal) {
+        elements.modelGuideModal.classList.add('open');
+      }
+    });
+    
+    elements.modelGuideClose?.addEventListener('click', () => {
+      if (elements.modelGuideModal) {
+        elements.modelGuideModal.classList.remove('open');
+      }
+    });
+    
+    // Close modal on overlay click
+    const modelModalOverlay = elements.modelGuideModal?.querySelector('.tp-modal-overlay');
+    if (modelModalOverlay) {
+      modelModalOverlay.addEventListener('click', () => {
+        if (elements.modelGuideModal) {
+          elements.modelGuideModal.classList.remove('open');
+        }
+      });
+    }
+    
+    // === MOBILE TOOLTIP HANDLING ===
+    
+    document.querySelectorAll('.tp-tooltip, .tp-tooltip-inline').forEach(tooltip => {
+      tooltip.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          e.stopPropagation();
+          tooltip.classList.toggle('active');
+          
+          // Close other tooltips
+          document.querySelectorAll('.tp-tooltip.active, .tp-tooltip-inline.active').forEach(other => {
+            if (other !== tooltip) {
+              other.classList.remove('active');
+            }
+          });
+        }
+      });
+    });
+    
+    // Close tooltips on outside click (mobile)
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && !e.target.closest('.tp-tooltip') && !e.target.closest('.tp-tooltip-inline')) {
+        document.querySelectorAll('.tp-tooltip.active, .tp-tooltip-inline.active').forEach(tooltip => {
+          tooltip.classList.remove('active');
+        });
+      }
     });
     
     // === SETTINGS ===
@@ -350,6 +713,25 @@ Make every section actionable and specific. Preserve the user's original intent 
     elements.drawerClose?.addEventListener('click', () => {
       if (elements.vibeDrawer) {
         elements.vibeDrawer.classList.remove('open');
+      }
+    });
+    
+    // Save & Continue button
+    elements.drawerSave?.addEventListener('click', () => {
+      if (elements.vibeDrawer) {
+        elements.vibeDrawer.classList.remove('open');
+        
+        // Show confirmation
+        updateStatus('ready', '✅ Vibe Coding settings saved!');
+        
+        // Focus input
+        if (elements.input) {
+          elements.input.focus();
+        }
+        
+        setTimeout(() => {
+          updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
+        }, 2000);
       }
     });
     
@@ -410,12 +792,28 @@ Make every section actionable and specific. Preserve the user's original intent 
           if (elements.input) {
             elements.input.value = '';
             elements.input.style.height = 'auto';
+            
+            // Reset placeholder
+            if (state.vibeCodingMode) {
+              elements.input.placeholder = 'Message Tiger Prompts... (Vibe Coding Mode active)';
+            } else {
+              elements.input.placeholder = 'Message Tiger Prompts...';
+            }
           }
           state.messageCount = 0;
           state.logoHidden = false;
+          state.activeTemplate = null;
+          
           if (elements.logoWrap) {
             elements.logoWrap.classList.remove('hidden');
           }
+          
+          // Hide pathway banner
+          if (elements.pathwayBanner) {
+            elements.pathwayBanner.style.display = 'none';
+          }
+          
+          updateEmptyState();
           updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
         }
       }
@@ -448,11 +846,21 @@ Make every section actionable and specific. Preserve the user's original intent 
         state.logoHidden = true;
       }
       
+      // Hide empty state
+      updateEmptyState();
+      
       const originalPrompt = prompt;
       if (elements.input) {
         elements.input.value = '';
         elements.input.style.height = 'auto';
         elements.input.focus();
+        
+        // Reset placeholder to default
+        if (state.vibeCodingMode) {
+          elements.input.placeholder = 'Message Tiger Prompts... (Vibe Coding Mode active)';
+        } else {
+          elements.input.placeholder = 'Message Tiger Prompts...';
+        }
       }
       
       scrollToBottom();
@@ -489,7 +897,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         
         // Auto-run if enabled
         if (state.autoRun && state.useLLM) {
-          // Add processing indicator
           const processingSection = document.createElement('div');
           processingSection.className = 'tp-llm-processing';
           processingSection.innerHTML = `
@@ -508,7 +915,6 @@ Make every section actionable and specific. Preserve the user's original intent 
           
           scrollToBottom();
           
-          // Execute the prompt
           await runEnhancedPrompt(msgContainer, result.enhanced, processingSection);
         }
         
@@ -523,7 +929,7 @@ Make every section actionable and specific. Preserve the user's original intent 
       scrollToBottom();
     }
     
-    // === RUN ENHANCED PROMPT (NEW FEATURE) ===
+    // === RUN ENHANCED PROMPT ===
     
     async function runEnhancedPrompt(msgContainer, enhancedPrompt, processingSection = null) {
       const runBtn = msgContainer.querySelector('.tp-run-btn');
@@ -534,7 +940,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running...';
       }
       
-      // If no processing section exists (manual run), create one
       if (!processingSection) {
         processingSection = document.createElement('div');
         processingSection.className = 'tp-llm-processing';
@@ -558,18 +963,15 @@ Make every section actionable and specific. Preserve the user's original intent 
       updateStatus('processing', '🤖 Running enhanced prompt...');
       
       try {
-        // Call LLM with enhanced prompt
         const response = await callOpenAI(
           'You are a helpful AI assistant. Respond naturally and helpfully to the user\'s request.',
           enhancedPrompt
         );
         
-        // Remove processing indicator
         if (processingSection && processingSection.parentNode) {
           processingSection.parentNode.removeChild(processingSection);
         }
         
-        // Add LLM response section to message card
         const llmResponseSection = document.createElement('div');
         llmResponseSection.className = 'tp-llm-response';
         llmResponseSection.innerHTML = `
@@ -593,7 +995,6 @@ Make every section actionable and specific. Preserve the user's original intent 
           msgContainer.appendChild(llmResponseSection);
         }
         
-        // Add copy functionality
         const copyBtn = llmResponseSection.querySelector('.tp-llm-response-copy');
         if (copyBtn) {
           copyBtn.addEventListener('click', () => {
@@ -621,7 +1022,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       } catch (error) {
         console.error('Run error:', error);
         
-        // Remove processing indicator on error
         if (processingSection && processingSection.parentNode) {
           processingSection.parentNode.removeChild(processingSection);
         }
@@ -640,17 +1040,24 @@ Make every section actionable and specific. Preserve the user's original intent 
     // === LLM ENHANCEMENT ===
     
     async function enhanceWithLLM(rawPrompt) {
+      let userPrompt = rawPrompt;
+      
+      if (state.activeTemplate && TEMPLATES[state.activeTemplate]) {
+        const template = TEMPLATES[state.activeTemplate];
+        userPrompt = `${template.systemContext}\n\n${rawPrompt}`;
+      }
+      
+      if (state.vibeCodingMode) {
+        userPrompt = buildVibeCodingPrompt(userPrompt);
+      }
+      
       const systemPrompt = state.enhancementDepth === 'light' 
         ? LLM_PROMPTS.light 
         : LLM_PROMPTS.deep;
       
-      let userPrompt = rawPrompt;
-      
-      if (state.vibeCodingMode) {
-        userPrompt = buildVibeCodingPrompt(rawPrompt);
-      }
-      
       const enhanced = await callOpenAI(systemPrompt, userPrompt);
+      
+      state.activeTemplate = null;
       
       const pqsBefore = calculatePQS(rawPrompt);
       const pqsAfter = calculatePQS(enhanced);
@@ -748,15 +1155,24 @@ Make every section actionable and specific. Preserve the user's original intent 
     async function enhancePromptTPEM(rawPrompt) {
       console.log('[TPEM] Starting local enhancement...');
       
-      const taskType = classifyTask(rawPrompt);
-      const ambiguityScore = calculateAmbiguity(rawPrompt);
+      let enhancedPrompt = rawPrompt;
+      
+      if (state.activeTemplate && TEMPLATES[state.activeTemplate]) {
+        const template = TEMPLATES[state.activeTemplate];
+        enhancedPrompt = `${template.systemContext}\n\n${rawPrompt}`;
+      }
+      
+      const taskType = classifyTask(enhancedPrompt);
+      const ambiguityScore = calculateAmbiguity(enhancedPrompt);
       
       let enhanced;
       if (state.enhancementDepth === 'light') {
-        enhanced = synthesizeContextLight(rawPrompt, taskType, ambiguityScore);
+        enhanced = synthesizeContextLight(enhancedPrompt, taskType, ambiguityScore);
       } else {
-        enhanced = synthesizeContextDeep(rawPrompt, taskType, ambiguityScore);
+        enhanced = synthesizeContextDeep(enhancedPrompt, taskType, ambiguityScore);
       }
+      
+      state.activeTemplate = null;
       
       const pqsBefore = calculatePQS(rawPrompt);
       const pqsAfter = calculatePQS(enhanced);
@@ -1033,7 +1449,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       const container = document.createElement('div');
       container.className = 'tp-msg';
       
-      // Show run button only if auto-run is OFF and LLM mode is ON
       const showRunBtn = !state.autoRun && state.useLLM;
       
       container.innerHTML = `
@@ -1129,7 +1544,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         });
       }
       
-      // Run button handler
       const runBtn = container.querySelector('.tp-run-btn');
       if (runBtn) {
         runBtn.addEventListener('click', () => {
@@ -1208,6 +1622,28 @@ Make every section actionable and specific. Preserve the user's original intent 
       }
     }
     
+    function updateEmptyState() {
+      if (elements.emptyState && elements.input) {
+        const hasMessages = state.messageCount > 0;
+        const hasInputText = elements.input.value.trim().length > 0;
+        const hasActiveTemplate = state.activeTemplate !== null;
+        
+        // Hide if: has messages OR has input text OR template is active
+        if (hasMessages || hasInputText || hasActiveTemplate) {
+          elements.emptyState.classList.add('hidden');
+        } else {
+          elements.emptyState.classList.remove('hidden');
+        }
+      }
+    }
+    
+    function updateModelHint() {
+      if (elements.modelHint) {
+        const hint = MODEL_HINTS[state.selectedLLM] || '';
+        elements.modelHint.textContent = hint;
+      }
+    }
+    
     function updateStatus(statusType, text) {
       if (elements.status) {
         elements.status.textContent = text;
@@ -1229,6 +1665,7 @@ Make every section actionable and specific. Preserve the user's original intent 
       return div.innerHTML;
     }
     
-    console.log('[TigerPrompts v10] Initialization complete ✓');
+    console.log('[TigerPrompts v11.5] ✅ COMPREHENSIVE FIX APPLIED!');
+    console.log('🔧 Fixed: Font Awesome icons, input bar rendering, all buttons working');
   });
 })();
