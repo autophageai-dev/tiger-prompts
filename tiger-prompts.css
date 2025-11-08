@@ -1,42 +1,65 @@
-/* Tiger Prompts v11.5 — COMPREHENSIVE ICON & INPUT FIX */
+/* Tiger Prompts v12.0 – UNICODE ICONS + LLM OPTIMIZATION 
+ * Fixed: Standardized tooltip system
+ * Added: AI-specific optimization tips
+ */
 
-/* CRITICAL: Font Awesome Icon Protection */
-i[class*="fa-"],
-i[class^="fa-"],
-.fa,
-.fas,
-.far,
-.fal,
-.fad,
-.fab {
-  font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
-  font-style: normal !important;
-  font-weight: 900 !important;
-  font-variant: normal !important;
-  text-rendering: auto !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
-  display: inline-block !important;
-  line-height: 1 !important;
+/* ========================================
+   UNICODE ICON SYSTEM
+   ======================================== */
+
+.tp-icon {
+  display: inline-block;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
 }
 
-/* Ensure Font Awesome solid icons work */
-.fa-solid {
-  font-family: "Font Awesome 6 Free" !important;
-  font-weight: 900 !important;
+/* ========================================
+   TOOLTIP SYSTEM - STANDARDIZED
+   ======================================== */
+
+.tp-tooltip,
+.tp-tooltip-inline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  font-size: 14px;
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: 6px;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  user-select: none;
+  line-height: 1;
 }
 
-/* Ensure Font Awesome regular icons work */
-.fa-regular {
-  font-family: "Font Awesome 6 Free" !important;
-  font-weight: 400 !important;
+.tp-tooltip:hover,
+.tp-tooltip-inline:hover {
+  color: #ff6600;
+  transform: scale(1.15);
 }
 
-/* Ensure Font Awesome brands work */
-.fa-brands {
-  font-family: "Font Awesome 6 Brands" !important;
-  font-weight: 400 !important;
+/* Dark mode adjustments */
+body.tp-dark .tp-tooltip,
+body.tp-dark .tp-tooltip-inline {
+  color: rgba(255, 255, 255, 0.5);
 }
+
+body.tp-dark .tp-tooltip:hover,
+body.tp-dark .tp-tooltip-inline:hover {
+  color: #ff6600;
+}
+
+/* JS handles tooltip popups - no CSS ::after needed */
 
 :root {
   --orange: #ff6600;
@@ -120,34 +143,9 @@ footer:not(.tp-footer),
 .tp-app {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
   min-height: 100vh;
   transition: background var(--transition), color var(--transition);
-}
-
-/* FORCE Inter everywhere - override Shopify theme */
-.tp-app *:not(i):not([class*="fa-"]),
-.tp-app *::before:not([class*="fa-"]),
-.tp-app *::after:not([class*="fa-"]) {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
-}
-
-/* Override any inherited fonts */
-.tp-app input,
-.tp-app textarea,
-.tp-app button,
-.tp-app select,
-.tp-app p,
-.tp-app span,
-.tp-app div,
-.tp-app h1, .tp-app h2, .tp-app h3, .tp-app h4, .tp-app h5, .tp-app h6 {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
-}
-
-/* CRITICAL: Icons must maintain Font Awesome font */
-.tp-app i[class*="fa-"],
-.tp-app i[class^="fa-"] {
-  font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .tp-layout {
@@ -161,7 +159,7 @@ footer:not(.tp-footer),
   grid-template-columns: 70px 1fr;
 }
 
-/* SIDEBAR STYLES */
+/* SIDEBAR */
 
 .tp-sidebar {
   background: var(--sidebar-bg);
@@ -221,6 +219,7 @@ footer:not(.tp-footer),
   object-fit: cover;
   flex-shrink: 0;
   transition: transform var(--transition-fast);
+  cursor: pointer;
 }
 
 .tp-sidebar-logo:hover {
@@ -301,92 +300,6 @@ footer:not(.tp-footer),
   gap: 6px;
 }
 
-/* FIXED TOOLTIPS */
-.tp-tooltip,
-.tp-tooltip-inline {
-  position: relative;
-  cursor: help;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 13px;
-  transition: color var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tp-tooltip:hover,
-.tp-tooltip-inline:hover {
-  color: var(--orange);
-}
-
-/* Tooltip bubble */
-.tp-tooltip::before,
-.tp-tooltip-inline::before {
-  content: attr(data-tooltip);
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.95);
-  color: white;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 500;
-  white-space: normal;
-  width: 220px;
-  text-align: center;
-  line-height: 1.5;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-fast);
-  z-index: 9999;
-  text-transform: none;
-  letter-spacing: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-/* Show tooltip on hover */
-.tp-tooltip:hover::before,
-.tp-tooltip-inline:hover::before {
-  opacity: 1;
-  bottom: auto;
-  top: -10px;
-  transform: translate(-50%, -100%);
-}
-
-/* Inline tooltips (inside buttons) */
-.tp-tooltip-inline {
-  margin-left: 6px;
-  font-size: 11px;
-}
-
-.tp-tooltip-inline::before {
-  width: 240px;
-  text-align: left;
-  left: 340px;
-  transform: translateY(-50%);
-}
-
-.tp-tooltip-inline:hover::before {
-  opacity: 1;
-  top: 50%;
-}
-
-/* Mobile: tap to show */
-@media (max-width: 768px) {
-  .tp-tooltip.active::before,
-  .tp-tooltip-inline.active::before {
-    opacity: 1;
-  }
-  
-  .tp-tooltip::before,
-  .tp-tooltip-inline::before {
-    width: 200px;
-    font-size: 10px;
-    padding: 8px 12px;
-  }
-}
-
 .tp-btn {
   display: flex;
   align-items: center;
@@ -427,7 +340,7 @@ footer:not(.tp-footer),
   z-index: 1;
 }
 
-.tp-btn i {
+.tp-btn .tp-icon {
   width: 18px;
   text-align: center;
   font-size: 14px;
@@ -488,7 +401,7 @@ body.tp-dark .tp-toggle-orange {
   box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
 }
 
-.tp-toggle-orange .tp-toggle-content i {
+.tp-toggle-orange .tp-toggle-content .tp-icon {
   color: var(--orange);
 }
 
@@ -524,7 +437,7 @@ body.tp-dark .tp-toggle-vibe {
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
-.tp-toggle-vibe .tp-toggle-content i {
+.tp-toggle-vibe .tp-toggle-content .tp-icon {
   color: var(--purple);
 }
 
@@ -550,7 +463,7 @@ body.tp-dark .tp-toggle-vibe .tp-toggle-switch {
   flex: 1;
 }
 
-.tp-toggle-content i {
+.tp-toggle-content .tp-icon {
   width: 18px;
   text-align: center;
   font-size: 14px;
@@ -599,25 +512,29 @@ body.tp-dark .tp-toggle-vibe .tp-toggle-switch {
 }
 
 .tp-model-guide-btn {
-  background: transparent;
+  background: rgba(255, 102, 0, 0.1);
   border: 1px solid rgba(255, 102, 0, 0.3);
   color: var(--orange);
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  font-style: normal;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   transition: all var(--transition-fast);
   padding: 0;
+  line-height: 1;
 }
 
 .tp-model-guide-btn:hover {
-  background: rgba(255, 102, 0, 0.1);
+  background: rgba(255, 102, 0, 0.2);
   border-color: var(--orange);
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .tp-model-hint {
@@ -626,6 +543,19 @@ body.tp-dark .tp-toggle-vibe .tp-toggle-switch {
   margin-top: 4px;
   padding-left: 4px;
   font-weight: 500;
+}
+
+.tp-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--orange);
+  background: rgba(255, 102, 0, 0.1);
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
 }
 
 .tp-advanced-settings {
@@ -802,7 +732,7 @@ body.tp-dark .tp-toggle-vibe .tp-toggle-switch {
   transform: translateY(-50%) scale(0.95);
 }
 
-.tp-collapse-tab i {
+.tp-collapse-tab .tp-icon {
   font-size: 12px;
   color: var(--text);
 }
@@ -819,7 +749,8 @@ body.tp-dark .tp-toggle-vibe .tp-toggle-switch {
   justify-content: center;
   align-items: stretch;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   min-height: 100vh;
   position: relative;
 }
@@ -830,9 +761,7 @@ body.tp-dark .tp-toggle-vibe .tp-toggle-switch {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-height: 100vh;
   position: relative;
-  overflow: hidden;
 }
 
 .tp-logo-wrap {
@@ -861,6 +790,7 @@ body.tp-dark .tp-toggle-vibe .tp-toggle-switch {
   max-width: 100%;
   height: auto;
   transition: transform var(--transition);
+  cursor: pointer;
 }
 
 .tp-logo:hover {
@@ -882,12 +812,12 @@ body:not(.tp-dark) .tp-logo-dark {
 /* EMPTY STATE */
 
 .tp-empty-state {
-  flex-shrink: 1;
-  flex-grow: 0;
+  flex: 1;
   padding: 40px 32px 32px;
   background: var(--bg);
   animation: fadeIn 0.4s ease;
   overflow: visible;
+  min-height: auto;
 }
 
 .tp-empty-state.hidden {
@@ -1001,7 +931,7 @@ body:not(.tp-dark) .tp-logo-dark {
   line-height: 1.3;
 }
 
-/* PATHWAY CONFIRMATION BANNER */
+/* PATHWAY BANNER */
 
 .tp-pathway-banner {
   background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
@@ -1075,17 +1005,15 @@ body:not(.tp-dark) .tp-logo-dark {
 /* THREAD */
 
 .tp-thread {
-  flex: 1 1 auto;
+  flex: 1;
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 24px 32px;
+  padding: 24px 32px 160px 32px;
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--bg);
-  min-height: 0;
-  max-height: 100%;
 }
 
 .tp-thread::-webkit-scrollbar {
@@ -1107,34 +1035,42 @@ body:not(.tp-dark) .tp-logo-dark {
   background: var(--text-muted);
 }
 
-/* INPUT - FIXED TO BOTTOM */
+/* INPUT BAR - FIXED TO BOTTOM */
 
 .tp-input-container {
-  position: sticky;
+  position: fixed;
   bottom: 0;
+  left: 320px;
+  right: 0;
   flex-shrink: 0;
   padding: 20px 32px 24px;
   background: var(--bg);
   border-top: 2px solid var(--border);
-  z-index: 10;
+  z-index: 100;
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  transition: left var(--transition);
+}
+
+.tp-layout.collapsed .tp-input-container {
+  left: 70px;
 }
 
 body.tp-dark .tp-input-container {
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
-  background: rgba(26, 26, 26, 0.95);
+  background: rgba(26, 26, 26, 0.98);
 }
 
 body:not(.tp-dark) .tp-input-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
 }
 
 .tp-input-wrap {
   position: relative;
   width: 100%;
-  max-width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .tp-input {
@@ -1147,7 +1083,6 @@ body:not(.tp-dark) .tp-input-container {
   outline: none;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
   resize: none;
   min-height: 56px;
   max-height: 200px;
@@ -1155,6 +1090,7 @@ body:not(.tp-dark) .tp-input-container {
   box-shadow: var(--shadow-sm);
   overflow-y: auto;
   display: block;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .tp-input:hover {
@@ -1240,7 +1176,77 @@ body:not(.tp-dark) .tp-input-container {
   box-shadow: 0 4px 12px rgba(255, 102, 0, 0.4);
 }
 
-/* VIBE DRAWER - FIXED LAYOUT FOR VISIBLE SAVE BUTTON */
+/* ANIMATED THINKING/LOADING */
+
+.tp-thinking {
+  padding: 60px 32px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.tp-thinking-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tp-thinking-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.tp-thinking-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--orange);
+  border-radius: 50%;
+  animation: thinkingPulse 1.4s ease-in-out infinite;
+}
+
+.tp-thinking-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.tp-thinking-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes thinkingPulse {
+  0%, 60%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  30% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+.tp-llm-processing-spinner .tp-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.tp-error {
+  padding: 32px;
+  text-align: center;
+  font-size: 16px;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* VIBE DRAWER */
 
 .tp-vibe-drawer {
   position: fixed;
@@ -1248,7 +1254,7 @@ body:not(.tp-dark) .tp-input-container {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 999;
+  z-index: 9999;
   display: none;
   align-items: center;
   justify-content: center;
@@ -1272,12 +1278,12 @@ body:not(.tp-dark) .tp-input-container {
   bottom: 0;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
-  z-index: 998;
+  z-index: 9998;
 }
 
 .tp-drawer-content {
   position: relative;
-  z-index: 999;
+  z-index: 9999;
   background: var(--bg);
   border-radius: 16px;
   max-height: 80vh;
@@ -1403,6 +1409,7 @@ body.tp-dark .tp-drawer-header {
   font-size: 14px;
   outline: none;
   transition: all var(--transition);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .tp-context-input:hover {
@@ -1421,7 +1428,7 @@ body.tp-dark .tp-drawer-header {
   border-radius: 10px;
   background: var(--bg);
   color: var(--text);
-  font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace !important;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
   font-size: 13px;
   line-height: 1.6;
   resize: vertical;
@@ -1498,8 +1505,6 @@ body.tp-dark .tp-drawer-header {
   accent-color: var(--purple);
 }
 
-/* VIBE DRAWER ACTIONS - ALWAYS VISIBLE AT BOTTOM */
-
 .tp-drawer-actions {
   padding: 18px 24px;
   border-top: 2px solid var(--border);
@@ -1547,7 +1552,7 @@ body.tp-dark .tp-drawer-actions {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1001;
+  z-index: 10001;
   display: none;
   align-items: center;
   justify-content: center;
@@ -1570,7 +1575,7 @@ body.tp-dark .tp-drawer-actions {
 
 .tp-modal-content {
   position: relative;
-  z-index: 1002;
+  z-index: 10002;
   background: var(--bg);
   border-radius: var(--radius-xl);
   max-width: 90vw;
@@ -1698,7 +1703,12 @@ body.tp-dark .tp-model-speed {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.tp-model-recommended {
+.tp-model-fast {
+  background: var(--orange);
+  color: white;
+}
+
+.tp-model-premium {
   background: var(--orange);
   color: white;
 }
@@ -1862,7 +1872,6 @@ body.tp-dark .tp-model-speed {
   font-size: 16px;
   line-height: 1.75;
   white-space: pre-wrap;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
   color: var(--text);
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -1951,14 +1960,8 @@ body.tp-dark .tp-model-speed {
   color: var(--orange);
 }
 
-.tp-llm-processing-spinner i {
+.tp-llm-processing-spinner .tp-icon {
   font-size: 20px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 .tp-msg-footer {
@@ -2034,29 +2037,6 @@ body.tp-dark .tp-msg-footer {
   color: var(--orange);
 }
 
-.tp-thinking {
-  padding: 60px 32px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.tp-thinking-dots {
-  display: inline-block;
-  width: 40px;
-  text-align: left;
-  color: var(--orange);
-}
-
-.tp-error {
-  padding: 32px;
-  text-align: center;
-  font-size: 16px;
-  color: #ef4444;
-  font-weight: 600;
-}
-
 /* FOOTER */
 
 .tp-footer {
@@ -2068,6 +2048,7 @@ body.tp-dark .tp-msg-footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 120px;
 }
 
 .tp-footer-content {
@@ -2109,11 +2090,29 @@ body.tp-dark .tp-msg-footer {
   .tp-layout {
     grid-template-columns: 280px 1fr;
   }
+  
+  .tp-input-container {
+    left: 280px;
+  }
+  
+  .tp-layout.collapsed .tp-input-container {
+    left: 70px;
+  }
+  
+  .tp-templates-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
   .tp-layout {
     grid-template-columns: 1fr;
+  }
+  
+  .tp-input-container {
+    left: 0 !important;
+    right: 0;
+    padding: 14px 16px 18px;
   }
   
   .tp-sidebar {
@@ -2132,6 +2131,10 @@ body.tp-dark .tp-msg-footer {
     box-shadow: var(--shadow-xl);
   }
   
+  .tp-empty-state {
+    padding: 24px 16px 20px;
+  }
+  
   .tp-templates-grid {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -2139,6 +2142,12 @@ body.tp-dark .tp-msg-footer {
   
   .tp-template {
     padding: 14px;
+  }
+  
+  .tp-template-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
   }
   
   .tp-pathway-banner {
@@ -2157,31 +2166,52 @@ body.tp-dark .tp-msg-footer {
   }
   
   .tp-thread {
-    padding: 20px 16px;
+    padding: 20px 16px 160px 16px;
   }
   
-  .tp-input-container {
-    padding: 14px 16px 18px;
+  .tp-input {
+    padding: 14px 120px 14px 18px;
+    font-size: 14px;
+    min-height: 52px;
+    border-radius: 20px;
+  }
+  
+  .tp-input-actions {
+    right: 6px;
+    gap: 4px;
   }
   
   .tp-voice,
   .tp-send,
   .tp-vibe-cog {
-    width: 44px;
-    height: 44px;
-    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    font-size: 15px;
   }
   
   .tp-msg-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    padding: 16px;
   }
   
   .tp-msg-actions {
     flex-direction: row;
     width: 100%;
     justify-content: flex-start;
+  }
+  
+  .tp-msg-content {
+    padding: 20px 16px;
+    font-size: 15px;
+  }
+  
+  .tp-msg-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
   
   .tp-drawer-content {
@@ -2200,6 +2230,83 @@ body.tp-dark .tp-msg-footer {
   .tp-language-grid {
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   }
+  
+  .tp-logo-wrap {
+    padding: 24px 16px;
+  }
+  
+  .tp-logo {
+    width: 140px;
+  }
+  
+  .tp-footer {
+    padding: 12px 0;
+    margin-bottom: 110px;
+  }
+  
+  .tp-status-indicator {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tp-empty-state {
+    padding: 20px 12px 16px;
+  }
+  
+  .tp-welcome-subtitle {
+    font-size: 16px;
+  }
+  
+  .tp-welcome-flow {
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .tp-templates-title {
+    font-size: 14px;
+  }
+  
+  .tp-template {
+    padding: 12px;
+  }
+  
+  .tp-template-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .tp-template-name {
+    font-size: 13px;
+  }
+  
+  .tp-template-desc {
+    font-size: 11px;
+  }
+  
+  .tp-thread {
+    padding: 16px 12px 150px 12px;
+  }
+  
+  .tp-input-container {
+    padding: 12px;
+  }
+  
+  .tp-input {
+    padding: 12px 110px 12px 16px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+  
+  .tp-voice,
+  .tp-send,
+  .tp-vibe-cog {
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+  }
 }
 
 html {
@@ -2209,4 +2316,14 @@ html {
 ::selection {
   background: var(--orange-glow);
   color: var(--text);
+}
+
+.tp-sidebar,
+.tp-thread,
+.tp-empty-state,
+.tp-drawer-body,
+.tp-modal-body,
+.tp-saved-list,
+.tp-input {
+  -webkit-overflow-scrolling: touch;
 }
