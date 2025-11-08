@@ -1,40 +1,242 @@
-/* Tiger Prompts v11.5 – COMPREHENSIVE FIX */
+/* Tiger Prompts v12.1 – AI-SPECIFIC OPTIMIZATION TIPS
+ * New: AI model-specific tips injection
+ * New: Language-specific coding tips
+ * Fixed: Standardized tooltip system
+ */
 (function() {
   'use strict';
   
-  // CRITICAL: Verify Font Awesome loaded
-  const checkFontAwesome = () => {
-    const testIcon = document.createElement('i');
-    testIcon.className = 'fa-solid fa-check';
-    testIcon.style.position = 'absolute';
-    testIcon.style.left = '-9999px';
-    document.body.appendChild(testIcon);
-    
-    const computed = window.getComputedStyle(testIcon);
-    const fontFamily = computed.getPropertyValue('font-family');
-    
-    document.body.removeChild(testIcon);
-    
-    if (!fontFamily.includes('Font Awesome')) {
-      console.error('[TigerPrompts] Font Awesome not loaded! Icons will display incorrectly.');
-      return false;
-    }
-    
-    console.log('[TigerPrompts] ✅ Font Awesome loaded successfully');
-    return true;
-  };
-  
   const $ = (id) => document.getElementById(id);
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
   
-  // Cloudflare Worker Configuration
   const WORKER_CONFIG = {
     endpoint: 'https://tigerprompts-proxy.autophageai.workers.dev',
     model: 'gpt-4o-mini'
   };
   
-  // TEMPLATE DEFINITIONS
+  const ICON_MAP = {
+    sparkles: '✨',
+    copy: '📋',
+    bookmark: '🔖',
+    play: '▶',
+    check: '✓',
+    spinner: '⟳',
+    robot: '🤖',
+    graduationCap: '🎓',
+    chartLine: '📊'
+  };
+  
+  // CODING AI OPTIMIZATION TIPS DATABASE
+  // These are tips for the AI the user will CODE WITH (not the enhancement AI)
+  const CODING_AI_TIPS = {
+    'claude-sonnet': {
+      name: 'Claude Sonnet',
+      general: [
+        'Prefers conversational, natural language',
+        'Use XML tags for structured sections',
+        'Provide clear role context upfront',
+        'Works well with explicit constraints'
+      ],
+      coding: {
+        javascript: [
+          'CRITICAL: Do not be verbose',
+          'Do not create README files unless explicitly requested',
+          'Do not add extensive comments - code should be self-documenting',
+          'Avoid tutorial-style explanations',
+          'Get straight to the implementation'
+        ],
+        typescript: [
+          'Be concise with type definitions',
+          'Avoid over-explaining TypeScript features',
+          'No tutorial content',
+          'Focus on practical implementation'
+        ],
+        python: [
+          'Keep it terse and Pythonic',
+          'No extensive docstrings unless requested',
+          'Avoid tutorial-style code',
+          'Focus on elegant solutions'
+        ],
+        react: [
+          'No verbose component documentation',
+          'Avoid explaining React basics',
+          'Get to the implementation quickly',
+          'No unnecessary prop documentation'
+        ],
+        css: [
+          'Concise class names',
+          'No extensive comments',
+          'Modern CSS only',
+          'Avoid explaining basic CSS concepts'
+        ]
+      }
+    },
+    'gpt-5': {
+      name: 'GPT-5 / ChatGPT',
+      general: [
+        'Can handle complex, multi-step reasoning',
+        'Use clear section headers for organization',
+        'Be specific about output format',
+        'Provide examples for best results'
+      ],
+      coding: {
+        javascript: [
+          'Specify ES6+ or CommonJS module format',
+          'Request async/await over callbacks',
+          'Can handle complex architecture decisions',
+          'Ask for performance optimization suggestions'
+        ],
+        typescript: [
+          'Explicitly request strict typing',
+          'Ask for interface definitions',
+          'Good at generic type inference',
+          'Can suggest advanced TypeScript patterns'
+        ],
+        python: [
+          'Specify Python 3.x version',
+          'Request type hints for functions',
+          'Strong with async patterns',
+          'Good at suggesting Pythonic solutions'
+        ],
+        react: [
+          'Request functional components with hooks',
+          'Can design complex state management',
+          'Ask for performance optimization (useMemo, useCallback)',
+          'Understands patterns and anti-patterns'
+        ],
+        css: [
+          'Specify vanilla CSS, SCSS, or Tailwind',
+          'Can create complex animations',
+          'Understands modern CSS features',
+          'Ask for responsive breakpoints'
+        ]
+      }
+    },
+    'cursor': {
+      name: 'Cursor',
+      general: [
+        'Reference existing codebase context',
+        'Mention file structure and relationships',
+        'Specify which files to modify vs create new',
+        'Describe integration points with existing code'
+      ],
+      coding: {
+        javascript: [
+          'Reference existing functions and patterns',
+          'Mention import paths and module structure',
+          'Describe where code should fit in current architecture',
+          'Specify existing conventions to follow'
+        ],
+        typescript: [
+          'Reference existing types and interfaces',
+          'Mention where type definitions live',
+          'Describe relationships to existing code',
+          'Specify config and tsconfig context'
+        ],
+        python: [
+          'Mention existing class hierarchy',
+          'Reference virtual environment setup',
+          'Describe integration with existing modules',
+          'Specify package dependencies'
+        ],
+        react: [
+          'Reference existing component structure',
+          'Mention state management approach',
+          'Describe styling methodology in use',
+          'Specify existing hooks and contexts'
+        ],
+        css: [
+          'Reference existing class naming patterns',
+          'Mention CSS methodology (BEM, CSS Modules)',
+          'Describe current responsive breakpoints',
+          'Specify preprocessor or framework in use'
+        ]
+      }
+    },
+    'github-copilot': {
+      name: 'GitHub Copilot',
+      general: [
+        'Focus on immediate code context',
+        'Describe expected behavior clearly',
+        'Use inline comments for guidance',
+        'Reference nearby functions and patterns'
+      ],
+      coding: {
+        javascript: [
+          'Mention existing file structure',
+          'Include import context',
+          'Specify module system (ESM/CommonJS)',
+          'Reference nearby functions'
+        ],
+        typescript: [
+          'Reference existing types nearby',
+          'Mention interface locations',
+          'Include import paths',
+          'Specify config requirements'
+        ],
+        python: [
+          'Include import statements context',
+          'Reference existing modules',
+          'Mention decorators or patterns in use',
+          'Specify package versions if critical'
+        ],
+        react: [
+          'Reference component hierarchy',
+          'Mention existing hooks',
+          'Include import paths',
+          'Specify state management library'
+        ],
+        css: [
+          'Reference existing class naming',
+          'Mention CSS methodology',
+          'Include preprocessor context',
+          'Specify framework (Bootstrap, Tailwind)'
+        ]
+      }
+    },
+    'windsurf': {
+      name: 'Windsurf',
+      general: [
+        'Provide complete project context',
+        'Describe file relationships clearly',
+        'Mention architectural patterns',
+        'Specify integration requirements'
+      ],
+      coding: {
+        javascript: [
+          'Describe module architecture',
+          'Mention build tools and bundlers',
+          'Reference testing setup',
+          'Specify linting rules'
+        ],
+        typescript: [
+          'Describe type architecture',
+          'Mention shared types location',
+          'Reference tsconfig setup',
+          'Specify strict mode requirements'
+        ],
+        python: [
+          'Describe project structure',
+          'Mention testing framework',
+          'Reference requirements.txt or pyproject.toml',
+          'Specify Python version'
+        ],
+        react: [
+          'Describe component architecture',
+          'Mention routing setup',
+          'Reference state management',
+          'Specify build configuration'
+        ],
+        css: [
+          'Describe styling architecture',
+          'Mention theme system',
+          'Reference design tokens',
+          'Specify CSS-in-JS if applicable'
+        ]
+      }
+    }
+  };
+  
   const TEMPLATES = {
     'fresh-session': {
       name: 'Fresh Coding Session',
@@ -157,7 +359,6 @@
     }
   };
   
-  // Model hints for different LLMs
   const MODEL_HINTS = {
     'gpt-4o-mini': '⚡ Fast & efficient',
     'gpt-4o': '💎 Best quality & reasoning',
@@ -165,7 +366,6 @@
     'copilot': '⚡ Code-focused'
   };
   
-  // LLM Enhancement Prompts
   const LLM_PROMPTS = {
     light: `You are an expert prompt engineer specializing in gentle refinement.
 
@@ -218,7 +418,6 @@ Structure your output as follows:
 Make every section actionable and specific. Preserve the user's original intent while dramatically improving clarity and structure.`
   };
   
-  // TPEM Configuration
   const TPEM = {
     PQS_WEIGHTS: {
       clarity: 0.25,
@@ -230,27 +429,23 @@ Make every section actionable and specific. Preserve the user's original intent 
     },
     
     TASK_TYPES: {
-      'generate': { keywords: ['write', 'create', 'generate', 'draft', 'compose', 'blog', 'email', 'ad', 'post'], icon: 'fa-pen-fancy' },
-      'transform': { keywords: ['rewrite', 'translate', 'summarize', 'condense', 'expand', 'paraphrase'], icon: 'fa-arrows-rotate' },
-      'analyze': { keywords: ['analyze', 'explain', 'compare', 'diagnose', 'critique', 'evaluate', 'assess'], icon: 'fa-magnifying-glass-chart' },
-      'plan': { keywords: ['plan', 'strategy', 'roadmap', 'outline', 'brief', 'campaign'], icon: 'fa-sitemap' },
-      'extract': { keywords: ['extract', 'parse', 'structure', 'table', 'json', 'list', 'entity'], icon: 'fa-filter' },
-      'code': { keywords: ['code', 'function', 'script', 'debug', 'refactor', 'test', 'program', 'algorithm'], icon: 'fa-code' },
-      'math': { keywords: ['calculate', 'solve', 'compute', 'derive', 'proof', 'formula'], icon: 'fa-calculator' },
-      'image': { keywords: ['image', 'picture', 'photo', 'visual', 'illustration', 'art'], icon: 'fa-image' }
+      'generate': { keywords: ['write', 'create', 'generate', 'draft', 'compose', 'blog', 'email', 'ad', 'post'], icon: '✍' },
+      'transform': { keywords: ['rewrite', 'translate', 'summarize', 'condense', 'expand', 'paraphrase'], icon: '↻' },
+      'analyze': { keywords: ['analyze', 'explain', 'compare', 'diagnose', 'critique', 'evaluate', 'assess'], icon: '🔍' },
+      'plan': { keywords: ['plan', 'strategy', 'roadmap', 'outline', 'brief', 'campaign'], icon: '📐' },
+      'extract': { keywords: ['extract', 'parse', 'structure', 'table', 'json', 'list', 'entity'], icon: '⊲' },
+      'code': { keywords: ['code', 'function', 'script', 'debug', 'refactor', 'test', 'program', 'algorithm'], icon: '💻' },
+      'math': { keywords: ['calculate', 'solve', 'compute', 'derive', 'proof', 'formula'], icon: '🔢' },
+      'image': { keywords: ['image', 'picture', 'photo', 'visual', 'illustration', 'art'], icon: '🖼' }
     }
   };
   
-  // Wait for DOM
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('[TigerPrompts v11.5] Initializing - COMPREHENSIVE FIX...');
-    
-    // Verify Font Awesome loaded
-    setTimeout(() => {
-      checkFontAwesome();
-    }, 500);
-    
-    // Get elements
+    console.log('[TigerPrompts v12.1] Initializing - AI-Specific Optimization Tips...');
+    initializeApp();
+  });
+  
+  function initializeApp() {
     const elements = {
       sendBtn: $('tp-send'),
       voiceBtn: $('tp-voice'),
@@ -275,6 +470,7 @@ Make every section actionable and specific. Preserve the user's original intent 
       enhancementDepth: $('tp-enhancement-depth'),
       autoRunToggle: $('tp-auto-run-toggle'),
       llmSelect: $('tp-llm-select'),
+      codingAISelect: $('tp-coding-ai-select'),
       logoWrap: $('tp-logo-wrap'),
       vibeDrawer: $('tp-vibe-drawer'),
       vibeDrawerToggle: $('tp-vibe-drawer-toggle'),
@@ -288,21 +484,20 @@ Make every section actionable and specific. Preserve the user's original intent 
       pathwayBanner: $('tp-pathway-banner')
     };
     
-    // Verify core elements
     if (!elements.sendBtn || !elements.input || !elements.thread) {
       console.error('[TigerPrompts] CRITICAL: Missing core elements');
       alert('Tiger Prompts failed to initialize. Please check the console.');
       return;
     }
     
-    console.log('[TigerPrompts v11.4] All core elements found');
+    console.log('[TigerPrompts v12.1] All core elements found');
     
-    // State
     let state = {
       useLLM: localStorage.getItem('tp-use-llm') !== 'false',
       enhancementDepth: localStorage.getItem('tp-enhancement-depth') || 'light',
       autoRun: localStorage.getItem('tp-auto-run') === 'true',
       selectedLLM: localStorage.getItem('tp-selected-llm') || 'gpt-4o-mini',
+      codingAI: localStorage.getItem('tp-coding-ai') || 'claude-sonnet',
       explainMode: localStorage.getItem('tp-explain') === 'true',
       showPQS: localStorage.getItem('tp-show-pqs') !== 'false',
       savedPrompts: JSON.parse(localStorage.getItem('tp-saved') || '[]'),
@@ -313,28 +508,28 @@ Make every section actionable and specific. Preserve the user's original intent 
       activeTemplate: null,
       codeContext: {
         existingCode: '',
-        language: '',
+        languages: [],
         isNewFeature: true,
         needsTesting: false
       }
     };
     
-    // Initialize UI
     updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
     loadSavedPrompts();
     updateSettingButtons();
     updateEmptyState();
     updateModelHint();
     
-    // Set dropdown values
     if (elements.enhancementDepth) {
       elements.enhancementDepth.value = state.enhancementDepth;
     }
     if (elements.llmSelect) {
       elements.llmSelect.value = state.selectedLLM;
     }
+    if (elements.codingAISelect) {
+      elements.codingAISelect.value = state.codingAI;
+    }
     
-    // Set toggle states
     const llmToggleItem = elements.llmToggle?.closest('.tp-toggle-item');
     if (llmToggleItem && state.useLLM) {
       llmToggleItem.classList.add('active');
@@ -350,17 +545,14 @@ Make every section actionable and specific. Preserve the user's original intent 
       vibeCodingToggleItem.classList.add('active');
     }
     
-    // Show vibe cog if vibe coding is active
     if (state.vibeCodingMode && elements.vibeDrawerToggle) {
       elements.vibeDrawerToggle.style.display = 'flex';
     }
     
-    // Update placeholder
     if (state.vibeCodingMode) {
       elements.input.placeholder = 'Message Tiger Prompts... (Vibe Coding Mode active)';
     }
     
-    // Enable dark mode by default
     if (localStorage.getItem('tp-dark-mode') === null) {
       document.body.classList.add('tp-dark');
       localStorage.setItem('tp-dark-mode', 'true');
@@ -368,10 +560,165 @@ Make every section actionable and specific. Preserve the user's original intent 
       document.body.classList.add('tp-dark');
     }
     
-    // Load file definitions
     if (elements.fileDefsInput && state.fileDefinitions) {
       elements.fileDefsInput.value = state.fileDefinitions;
     }
+    
+    // === JS-POWERED TOOLTIP SYSTEM (STANDARDIZED) ===
+    
+    let activeTooltip = null;
+    
+    const createTooltipElement = (text) => {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tp-tooltip-popup';
+      tooltip.textContent = text;
+      tooltip.style.cssText = `
+        position: fixed;
+        background: rgba(0, 0, 0, 0.95);
+        color: white;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        max-width: 260px;
+        z-index: 999999;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: left;
+        white-space: normal;
+        word-wrap: break-word;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-weight: 500;
+      `;
+      return tooltip;
+    };
+    
+    const positionTooltip = (tooltip, trigger) => {
+      const rect = trigger.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      
+      let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+      let top = rect.top - tooltipRect.height - 8;
+      
+      if (left < 10) left = 10;
+      if (left + tooltipRect.width > window.innerWidth - 10) {
+        left = window.innerWidth - tooltipRect.width - 10;
+      }
+      
+      if (top < 10) {
+        top = rect.bottom + 8;
+      }
+      
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    };
+    
+    const showTooltip = (trigger, text) => {
+      if (activeTooltip) {
+        if (activeTooltip.element && activeTooltip.element.parentNode) {
+          activeTooltip.element.parentNode.removeChild(activeTooltip.element);
+        }
+        activeTooltip = null;
+      }
+      
+      const tooltip = createTooltipElement(text);
+      document.body.appendChild(tooltip);
+      
+      positionTooltip(tooltip, trigger);
+      
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          tooltip.style.visibility = 'visible';
+          tooltip.style.opacity = '1';
+        });
+      });
+      
+      activeTooltip = { element: tooltip, trigger };
+    };
+    
+    const hideTooltip = () => {
+      if (activeTooltip) {
+        activeTooltip.element.style.opacity = '0';
+        activeTooltip.element.style.visibility = 'hidden';
+        setTimeout(() => {
+          if (activeTooltip && activeTooltip.element.parentNode) {
+            activeTooltip.element.parentNode.removeChild(activeTooltip.element);
+          }
+          activeTooltip = null;
+        }, 200);
+      }
+    };
+    
+    const initializeTooltips = () => {
+      document.querySelectorAll('.tp-tooltip, .tp-tooltip-inline').forEach(trigger => {
+        const tooltipText = trigger.getAttribute('data-tooltip');
+        if (!tooltipText) return;
+        
+        let showTimeout;
+        let isButton = trigger.tagName === 'BUTTON';
+        
+        trigger.addEventListener('mouseenter', () => {
+          if (window.innerWidth > 768) {
+            showTimeout = setTimeout(() => {
+              showTooltip(trigger, tooltipText);
+            }, 400);
+          }
+        });
+        
+        trigger.addEventListener('mouseleave', () => {
+          clearTimeout(showTimeout);
+          if (window.innerWidth > 768) {
+            hideTooltip();
+          }
+        });
+        
+        trigger.addEventListener('click', (e) => {
+          clearTimeout(showTimeout);
+          
+          if (window.innerWidth <= 768) {
+            e.stopPropagation();
+            if (activeTooltip && activeTooltip.trigger === trigger) {
+              hideTooltip();
+            } else {
+              showTooltip(trigger, tooltipText);
+            }
+          } else if (!isButton) {
+            e.stopPropagation();
+            if (activeTooltip && activeTooltip.trigger === trigger) {
+              hideTooltip();
+            } else {
+              showTooltip(trigger, tooltipText);
+            }
+          } else {
+            hideTooltip();
+          }
+        });
+      });
+    };
+    
+    initializeTooltips();
+    
+    document.addEventListener('click', (e) => {
+      if (activeTooltip && !e.target.closest('.tp-tooltip') && !e.target.closest('.tp-tooltip-inline')) {
+        hideTooltip();
+      }
+    });
+    
+    window.addEventListener('scroll', () => {
+      if (activeTooltip) {
+        positionTooltip(activeTooltip.element, activeTooltip.trigger);
+      }
+    }, { passive: true });
+    
+    window.addEventListener('resize', () => {
+      if (activeTooltip) {
+        positionTooltip(activeTooltip.element, activeTooltip.trigger);
+      }
+    }, { passive: true });
     
     // === INPUT HANDLERS ===
     
@@ -379,7 +726,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       elements.input.style.height = 'auto';
       elements.input.style.height = Math.min(elements.input.scrollHeight, 200) + 'px';
       
-      // Reset placeholder if input is cleared
       if (elements.input.value.trim() === '' && state.activeTemplate) {
         const template = TEMPLATES[state.activeTemplate];
         if (template) {
@@ -387,7 +733,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         }
       }
       
-      // Update empty state visibility
       updateEmptyState();
     });
     
@@ -400,13 +745,12 @@ Make every section actionable and specific. Preserve the user's original intent 
     
     elements.sendBtn.addEventListener('click', runEnhancer);
     
-    // === LOGO CLICK - RETURN TO HOME ===
+    // === LOGO CLICK ===
     
     const logoImages = document.querySelectorAll('.tp-logo, .tp-sidebar-logo');
     logoImages.forEach(logo => {
       logo.addEventListener('click', () => {
         if (state.messageCount > 0 || state.activeTemplate) {
-          // Reset everything
           if (elements.thread) {
             elements.thread.innerHTML = '';
           }
@@ -426,12 +770,10 @@ Make every section actionable and specific. Preserve the user's original intent 
             elements.logoWrap.classList.remove('hidden');
           }
           
-          // Hide pathway banner
           if (elements.pathwayBanner) {
             elements.pathwayBanner.style.display = 'none';
           }
           
-          // Close any open modals/drawers
           if (elements.vibeDrawer) {
             elements.vibeDrawer.classList.remove('open');
           }
@@ -441,7 +783,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         }
       });
       
-      // Add cursor pointer to indicate it's clickable
       logo.style.cursor = 'pointer';
     });
     
@@ -526,6 +867,23 @@ Make every section actionable and specific. Preserve the user's original intent 
       updateModelHint();
     });
     
+    // === CODING AI SELECT ===
+    
+    elements.codingAISelect?.addEventListener('change', (e) => {
+      state.codingAI = e.target.value;
+      localStorage.setItem('tp-coding-ai', state.codingAI);
+      
+      const codingAINames = {
+        'claude-sonnet': 'Claude Sonnet',
+        'gpt-5': 'GPT-5 / ChatGPT',
+        'cursor': 'Cursor',
+        'github-copilot': 'GitHub Copilot',
+        'windsurf': 'Windsurf'
+      };
+      
+      updateStatus('ready', `💻 Coding with: ${codingAINames[state.codingAI]}`);
+    });
+    
     // === TEMPLATE SYSTEM ===
     
     document.querySelectorAll('.tp-template').forEach(btn => {
@@ -535,23 +893,19 @@ Make every section actionable and specific. Preserve the user's original intent 
         
         if (!template) return;
         
-        // Store active template
         state.activeTemplate = templateId;
         
-        // Update placeholder
         if (elements.input) {
           elements.input.placeholder = template.placeholder;
           elements.input.focus();
         }
         
-        // Set enhancement depth
         if (elements.enhancementDepth) {
           elements.enhancementDepth.value = template.depth;
           state.enhancementDepth = template.depth;
           localStorage.setItem('tp-enhancement-depth', template.depth);
         }
         
-        // Enable vibe coding if needed
         if (template.enableVibeCoding && !state.vibeCodingMode) {
           state.vibeCodingMode = true;
           localStorage.setItem('tp-vibe-coding', state.vibeCodingMode);
@@ -566,15 +920,12 @@ Make every section actionable and specific. Preserve the user's original intent 
           }
         }
         
-        // Hide empty state IMMEDIATELY
         if (elements.emptyState) {
           elements.emptyState.classList.add('hidden');
         }
         
-        // Show pathway confirmation banner
         showPathwayBanner(template);
         
-        // Auto-open vibe drawer if specified
         if (template.autoOpenDrawer && template.enableVibeCoding && elements.vibeDrawer) {
           setTimeout(() => {
             elements.vibeDrawer.classList.add('open');
@@ -582,8 +933,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         }
       });
     });
-    
-    // === PATHWAY CONFIRMATION BANNER ===
     
     function showPathwayBanner(template) {
       if (!elements.pathwayBanner) return;
@@ -596,13 +945,11 @@ Make every section actionable and specific. Preserve the user's original intent 
       
       elements.pathwayBanner.style.display = 'flex';
       
-      // Auto-hide after 15 seconds
       setTimeout(() => {
         elements.pathwayBanner.style.display = 'none';
       }, 15000);
     }
     
-    // Close pathway banner
     if (elements.pathwayBanner) {
       const closeBtn = elements.pathwayBanner.querySelector('.tp-pathway-close');
       if (closeBtn) {
@@ -626,7 +973,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       }
     });
     
-    // Close modal on overlay click
     const modelModalOverlay = elements.modelGuideModal?.querySelector('.tp-modal-overlay');
     if (modelModalOverlay) {
       modelModalOverlay.addEventListener('click', () => {
@@ -635,33 +981,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         }
       });
     }
-    
-    // === MOBILE TOOLTIP HANDLING ===
-    
-    document.querySelectorAll('.tp-tooltip, .tp-tooltip-inline').forEach(tooltip => {
-      tooltip.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
-          e.stopPropagation();
-          tooltip.classList.toggle('active');
-          
-          // Close other tooltips
-          document.querySelectorAll('.tp-tooltip.active, .tp-tooltip-inline.active').forEach(other => {
-            if (other !== tooltip) {
-              other.classList.remove('active');
-            }
-          });
-        }
-      });
-    });
-    
-    // Close tooltips on outside click (mobile)
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 768 && !e.target.closest('.tp-tooltip') && !e.target.closest('.tp-tooltip-inline')) {
-        document.querySelectorAll('.tp-tooltip.active, .tp-tooltip-inline.active').forEach(tooltip => {
-          tooltip.classList.remove('active');
-        });
-      }
-    });
     
     // === SETTINGS ===
     
@@ -688,7 +1007,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         toggleItem.classList.toggle('active', state.vibeCodingMode);
       }
       
-      // Show/hide vibe cog button
       if (elements.vibeDrawerToggle) {
         elements.vibeDrawerToggle.style.display = state.vibeCodingMode ? 'flex' : 'none';
       }
@@ -716,15 +1034,12 @@ Make every section actionable and specific. Preserve the user's original intent 
       }
     });
     
-    // Save & Continue button
     elements.drawerSave?.addEventListener('click', () => {
       if (elements.vibeDrawer) {
         elements.vibeDrawer.classList.remove('open');
         
-        // Show confirmation
         updateStatus('ready', '✅ Vibe Coding settings saved!');
         
-        // Focus input
         if (elements.input) {
           elements.input.focus();
         }
@@ -735,7 +1050,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       }
     });
     
-    // Close drawer on overlay click
     const drawerOverlay = elements.vibeDrawer?.querySelector('.tp-drawer-overlay');
     if (drawerOverlay) {
       drawerOverlay.addEventListener('click', () => {
@@ -773,9 +1087,8 @@ Make every section actionable and specific. Preserve the user's original intent 
     
     document.querySelectorAll('.tp-language-checkbox input[type="checkbox"]').forEach(checkbox => {
       checkbox.addEventListener('change', () => {
-        const selected = Array.from(document.querySelectorAll('.tp-language-checkbox input[type="checkbox"]:checked'))
+        state.codeContext.languages = Array.from(document.querySelectorAll('.tp-language-checkbox input[type="checkbox"]:checked'))
           .map(cb => cb.value);
-        state.codeContext.language = selected.join(', ');
       });
     });
     
@@ -793,7 +1106,6 @@ Make every section actionable and specific. Preserve the user's original intent 
             elements.input.value = '';
             elements.input.style.height = 'auto';
             
-            // Reset placeholder
             if (state.vibeCodingMode) {
               elements.input.placeholder = 'Message Tiger Prompts... (Vibe Coding Mode active)';
             } else {
@@ -808,7 +1120,6 @@ Make every section actionable and specific. Preserve the user's original intent 
             elements.logoWrap.classList.remove('hidden');
           }
           
-          // Hide pathway banner
           if (elements.pathwayBanner) {
             elements.pathwayBanner.style.display = 'none';
           }
@@ -818,6 +1129,38 @@ Make every section actionable and specific. Preserve the user's original intent 
         }
       }
     });
+    
+    // === CODING AI OPTIMIZATION INJECTION ===
+    
+    function injectCodingAITips(prompt, codingAI, languages = []) {
+      const aiConfig = CODING_AI_TIPS[codingAI];
+      if (!aiConfig) return prompt;
+      
+      let optimizationSection = '\n\n## 🎯 Coding AI Optimization Tips\n';
+      optimizationSection += `**Optimized for: ${aiConfig.name}**\n\n`;
+      
+      // Add general tips
+      optimizationSection += '**General Guidelines:**\n';
+      aiConfig.general.forEach(tip => {
+        optimizationSection += `- ${tip}\n`;
+      });
+      
+      // Add language-specific coding tips
+      if (languages.length > 0 && aiConfig.coding) {
+        optimizationSection += '\n**Language-Specific Tips:**\n';
+        languages.forEach(lang => {
+          const langLower = lang.toLowerCase();
+          if (aiConfig.coding[langLower]) {
+            optimizationSection += `\n*${lang}:*\n`;
+            aiConfig.coding[langLower].forEach(tip => {
+              optimizationSection += `- ${tip}\n`;
+            });
+          }
+        });
+      }
+      
+      return prompt + optimizationSection;
+    }
     
     // === MAIN ENHANCEMENT LOGIC ===
     
@@ -839,14 +1182,12 @@ Make every section actionable and specific. Preserve the user's original intent 
         elements.thread.appendChild(msgContainer);
       }
       
-      // Hide logo after first message
       state.messageCount++;
       if (state.messageCount === 1 && !state.logoHidden && elements.logoWrap) {
         elements.logoWrap.classList.add('hidden');
         state.logoHidden = true;
       }
       
-      // Hide empty state
       updateEmptyState();
       
       const originalPrompt = prompt;
@@ -855,7 +1196,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         elements.input.style.height = 'auto';
         elements.input.focus();
         
-        // Reset placeholder to default
         if (state.vibeCodingMode) {
           elements.input.placeholder = 'Message Tiger Prompts... (Vibe Coding Mode active)';
         } else {
@@ -865,29 +1205,37 @@ Make every section actionable and specific. Preserve the user's original intent 
       
       scrollToBottom();
       
-      // Show thinking animation
       const content = msgContainer.querySelector('.tp-msg-content');
       if (content) {
-        content.innerHTML = '<div class="tp-thinking">Thinking<span class="tp-thinking-dots"></span></div>';
+        content.innerHTML = `
+          <div class="tp-thinking">
+            <div class="tp-thinking-text">
+              <span>Thinking</span>
+              <span class="tp-thinking-dots">
+                <span class="tp-thinking-dot"></span>
+                <span class="tp-thinking-dot"></span>
+                <span class="tp-thinking-dot"></span>
+              </span>
+            </div>
+          </div>
+        `;
       }
       
-      let dotCount = 0;
-      const dotsInterval = setInterval(() => {
-        const dotsEl = content?.querySelector('.tp-thinking-dots');
-        if (dotsEl) {
-          dotCount = (dotCount + 1) % 4;
-          dotsEl.textContent = '.'.repeat(dotCount);
-        }
-      }, 300);
-      
       await sleep(1500);
-      clearInterval(dotsInterval);
       
       let result;
       
       try {
         if (state.useLLM) {
           result = await enhanceWithLLM(originalPrompt);
+          // Inject coding AI tips only if in Vibe Coding mode
+          if (state.vibeCodingMode) {
+            result.enhanced = injectCodingAITips(
+              result.enhanced, 
+              state.codingAI, 
+              state.codeContext.languages
+            );
+          }
         } else {
           result = await enhancePromptTPEM(originalPrompt);
         }
@@ -895,13 +1243,12 @@ Make every section actionable and specific. Preserve the user's original intent 
         updateMessage(msgContainer, result);
         updateStatus('ready', '✅ Enhancement Complete');
         
-        // Auto-run if enabled
         if (state.autoRun && state.useLLM) {
           const processingSection = document.createElement('div');
           processingSection.className = 'tp-llm-processing';
           processingSection.innerHTML = `
             <div class="tp-llm-processing-spinner">
-              <i class="fa-solid fa-spinner"></i>
+              <span class="tp-icon">⟳</span>
               <span>Running enhanced prompt through ${state.selectedLLM}...</span>
             </div>
           `;
@@ -929,15 +1276,15 @@ Make every section actionable and specific. Preserve the user's original intent 
       scrollToBottom();
     }
     
-    // === RUN ENHANCED PROMPT ===
-    
     async function runEnhancedPrompt(msgContainer, enhancedPrompt, processingSection = null) {
       const runBtn = msgContainer.querySelector('.tp-run-btn');
       
       if (runBtn) {
         runBtn.disabled = true;
         runBtn.classList.add('running');
-        runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running...';
+        const icon = runBtn.querySelector('.tp-icon');
+        if (icon) icon.textContent = '⟳';
+        runBtn.innerHTML = '<span class="tp-icon">⟳</span> Running...';
       }
       
       if (!processingSection) {
@@ -945,7 +1292,7 @@ Make every section actionable and specific. Preserve the user's original intent 
         processingSection.className = 'tp-llm-processing';
         processingSection.innerHTML = `
           <div class="tp-llm-processing-spinner">
-            <i class="fa-solid fa-spinner"></i>
+            <span class="tp-icon">⟳</span>
             <span>Running enhanced prompt through ${state.selectedLLM}...</span>
           </div>
         `;
@@ -977,11 +1324,11 @@ Make every section actionable and specific. Preserve the user's original intent 
         llmResponseSection.innerHTML = `
           <div class="tp-llm-response-header">
             <div class="tp-llm-response-title">
-              <i class="fa-solid fa-robot"></i>
+              <span class="tp-icon">🤖</span>
               <span>LLM Response (${state.selectedLLM})</span>
             </div>
             <button class="tp-llm-response-copy">
-              <i class="fa-solid fa-copy"></i>
+              <span class="tp-icon">📋</span>
               Copy Response
             </button>
           </div>
@@ -999,10 +1346,10 @@ Make every section actionable and specific. Preserve the user's original intent 
         if (copyBtn) {
           copyBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(response).then(() => {
-              copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+              copyBtn.innerHTML = '<span class="tp-icon">✓</span> Copied!';
               copyBtn.classList.add('copied');
               setTimeout(() => {
-                copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy Response';
+                copyBtn.innerHTML = '<span class="tp-icon">📋</span> Copy Response';
                 copyBtn.classList.remove('copied');
               }, 2000);
             });
@@ -1013,7 +1360,7 @@ Make every section actionable and specific. Preserve the user's original intent 
           runBtn.disabled = false;
           runBtn.classList.remove('running');
           runBtn.classList.add('complete');
-          runBtn.innerHTML = '<i class="fa-solid fa-check"></i> Response Generated ✓';
+          runBtn.innerHTML = '<span class="tp-icon">✓</span> Response Generated ✓';
         }
         
         updateStatus('ready', '✅ Execution Complete');
@@ -1029,15 +1376,13 @@ Make every section actionable and specific. Preserve the user's original intent 
         if (runBtn) {
           runBtn.disabled = false;
           runBtn.classList.remove('running');
-          runBtn.innerHTML = '<i class="fa-solid fa-play"></i> Run This Prompt';
+          runBtn.innerHTML = '<span class="tp-icon">▶</span> Run This Prompt';
         }
         
         alert('Error running prompt: ' + error.message);
         updateStatus('ready', '❌ Execution Failed');
       }
     }
-    
-    // === LLM ENHANCEMENT ===
     
     async function enhanceWithLLM(rawPrompt) {
       let userPrompt = rawPrompt;
@@ -1095,8 +1440,8 @@ Make every section actionable and specific. Preserve the user's original intent 
         sections.push('**CRITICAL:** Study the code above. Match its style, patterns, and conventions exactly.');
       }
       
-      if (state.codeContext.language) {
-        sections.push(`\n\n## Languages: ${state.codeContext.language}`);
+      if (state.codeContext.languages.length > 0) {
+        sections.push(`\n\n## Languages: ${state.codeContext.languages.join(', ')}`);
       }
       
       if (state.codeContext.needsTesting) {
@@ -1113,6 +1458,22 @@ Make every section actionable and specific. Preserve the user's original intent 
       
       if (state.vibeCodingMode) {
         changes.push(`<strong>💻 Vibe Coding Mode:</strong> Applied coding-specific optimizations`);
+        
+        const aiConfig = CODING_AI_TIPS[state.codingAI];
+        if (aiConfig) {
+          const tipCount = aiConfig.general.length;
+          let codingTipCount = 0;
+          if (state.codeContext.languages.length > 0 && aiConfig.coding) {
+            state.codeContext.languages.forEach(lang => {
+              const langLower = lang.toLowerCase();
+              if (aiConfig.coding[langLower]) {
+                codingTipCount += aiConfig.coding[langLower].length;
+              }
+            });
+          }
+          const totalTips = tipCount + codingTipCount;
+          changes.push(`<strong>🎯 Optimized for ${aiConfig.name}:</strong> Injected ${totalTips} coding AI-specific tips`);
+        }
       }
       
       const pqsBefore = calculatePQS(original);
@@ -1149,8 +1510,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       const data = await response.json();
       return data.choices[0].message.content.trim();
     }
-    
-    // === LOCAL TPEM PIPELINE ===
     
     async function enhancePromptTPEM(rawPrompt) {
       console.log('[TPEM] Starting local enhancement...');
@@ -1376,8 +1735,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       return changes;
     }
     
-    // === PQS CALCULATION ===
-    
     function calculatePQS(prompt) {
       const metrics = {
         clarity: calculateClarity(prompt),
@@ -1443,8 +1800,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       return 0.3;
     }
     
-    // === UI HELPERS ===
-    
     function createMessageContainer() {
       const container = document.createElement('div');
       container.className = 'tp-msg';
@@ -1454,21 +1809,21 @@ Make every section actionable and specific. Preserve the user's original intent 
       container.innerHTML = `
         <div class="tp-msg-header">
           <div class="tp-msg-label">
-            <i class="fa-solid fa-sparkles"></i>
+            <span class="tp-icon">✨</span>
             Enhanced by ${state.useLLM ? 'OpenAI' : 'TPEM'} (${state.enhancementDepth})
           </div>
           <div class="tp-msg-actions">
             <button class="tp-copy-btn">
-              <i class="fa-solid fa-copy"></i>
+              <span class="tp-icon">📋</span>
               Copy
             </button>
             <button class="tp-save-btn">
-              <i class="fa-solid fa-bookmark"></i>
+              <span class="tp-icon">🔖</span>
               Save
             </button>
             ${showRunBtn ? `
             <button class="tp-run-btn">
-              <i class="fa-solid fa-play"></i>
+              <span class="tp-icon">▶</span>
               Run This Prompt
             </button>
             ` : ''}
@@ -1478,7 +1833,7 @@ Make every section actionable and specific. Preserve the user's original intent 
         <div class="tp-msg-footer" style="display:none;">
           <div>
             <span class="tp-pqs-badge">
-              <i class="fa-solid fa-chart-line"></i>
+              <span class="tp-icon">📊</span>
               PQS: <span class="tp-pqs-score">--</span>
             </span>
           </div>
@@ -1509,7 +1864,7 @@ Make every section actionable and specific. Preserve the user's original intent 
         explDiv.className = 'tp-explanation';
         explDiv.innerHTML = `
           <div class="tp-explanation-title">
-            <i class="fa-solid fa-graduation-cap"></i>
+            <span class="tp-icon">🎓</span>
             What We Enhanced
           </div>
           ${result.explanation.map(item => `<div class="tp-explanation-item">${item}</div>`).join('')}
@@ -1523,10 +1878,10 @@ Make every section actionable and specific. Preserve the user's original intent 
       if (copyBtn) {
         copyBtn.addEventListener('click', () => {
           navigator.clipboard.writeText(result.enhanced).then(() => {
-            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            copyBtn.innerHTML = '<span class="tp-icon">✓</span> Copied!';
             copyBtn.classList.add('copied');
             setTimeout(() => {
-              copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy';
+              copyBtn.innerHTML = '<span class="tp-icon">📋</span> Copy';
               copyBtn.classList.remove('copied');
             }, 2000);
           });
@@ -1537,9 +1892,9 @@ Make every section actionable and specific. Preserve the user's original intent 
       if (saveBtn) {
         saveBtn.addEventListener('click', () => {
           savePrompt(result.enhanced, result.original);
-          saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+          saveBtn.innerHTML = '<span class="tp-icon">✓</span> Saved!';
           setTimeout(() => {
-            saveBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Save';
+            saveBtn.innerHTML = '<span class="tp-icon">🔖</span> Save';
           }, 2000);
         });
       }
@@ -1581,7 +1936,7 @@ Make every section actionable and specific. Preserve the user's original intent 
         <div class="tp-saved-item" data-id="${p.id}">
           <span class="tp-saved-item-text">${p.original}</span>
           <button class="tp-saved-item-delete" data-id="${p.id}">
-            <i class="fa-solid fa-trash"></i>
+            <span class="tp-icon">🗑</span>
           </button>
         </div>
       `).join('');
@@ -1628,7 +1983,6 @@ Make every section actionable and specific. Preserve the user's original intent 
         const hasInputText = elements.input.value.trim().length > 0;
         const hasActiveTemplate = state.activeTemplate !== null;
         
-        // Hide if: has messages OR has input text OR template is active
         if (hasMessages || hasInputText || hasActiveTemplate) {
           elements.emptyState.classList.add('hidden');
         } else {
@@ -1665,7 +2019,6 @@ Make every section actionable and specific. Preserve the user's original intent 
       return div.innerHTML;
     }
     
-    console.log('[TigerPrompts v11.5] ✅ COMPREHENSIVE FIX APPLIED!');
-    console.log('🔧 Fixed: Font Awesome icons, input bar rendering, all buttons working');
-  });
+    console.log('[TigerPrompts v12.1] ✅ READY - AI Optimization Tips Active!');
+  }
 })();
