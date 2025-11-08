@@ -1,38 +1,42 @@
-/* Tiger Prompts v9.0 – LLM Agent Mode + Vibe Coding Tools */
+/* Tiger Prompts v10 – Production Ready with Run Button + Vibe Drawer */
 (function() {
   'use strict';
   
   const $ = (id) => document.getElementById(id);
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   
-  // OpenAI API Configuration
-  const OPENAI_CONFIG = {
-    apiKey: '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',
-    endpoint: 'https://api.openai.com/v1/chat/completions',
-    model: 'gpt-4o-mini'  // More accessible model
+  // Cloudflare Worker Configuration
+  const WORKER_CONFIG = {
+    endpoint: 'https://tigerprompts-proxy.autophageai.workers.dev',
+    model: 'gpt-4o-mini'
   };
   
   // LLM Enhancement Prompts
   const LLM_PROMPTS = {
-    light: `You are an expert prompt engineer and logic refiner.
-Your task: take any user's input prompt and make it more effective, specific, and logically coherent — while keeping it concise and preserving the user's original intent.
+    light: `You are an expert prompt engineer specializing in gentle refinement.
 
-Always:
-✅ Clarify vague phrases with exact language.
-✅ Add structure: organize goals, context, and output requirements in logical order.
-✅ Refine logic: ensure each instruction is actionable and self-consistent.
-✅ Add precision: specify tone, format, audience, and constraints where missing.
-✅ Preserve brevity — improve depth without making it longer than necessary.
-✅ Avoid filler or redundant rephrasing.
-✅ Never change the user's intent or creativity.
+Your task: Take the user's prompt and polish it with minimal changes. Keep their voice and intent completely intact.
 
-Output only the enhanced prompt, formatted cleanly and ready for direct use by an AI model.`,
+What to do:
+✅ Clarify any vague phrases with more specific language
+✅ Fix grammar and improve sentence flow
+✅ Add 1-2 sentences ONLY if critical information is missing
+✅ Use more precise, concrete words where applicable
+✅ Keep the same length and structure (don't reorganize)
+
+What NOT to do:
+❌ Don't restructure or reformat the prompt
+❌ Don't add headers, sections, or bullet points
+❌ Don't change the user's tone or style
+❌ Don't make it significantly longer
+
+Output: The polished prompt, ready to use. Keep it natural and conversational.`,
     
-    deep: `You are a senior prompt architect specializing in complex task decomposition.
+    deep: `You are a senior prompt architect specializing in complex task structuring.
 
-Your task: transform the user's prompt into a comprehensive, structured directive that maximizes AI effectiveness.
+Your task: Transform the user's prompt into a comprehensive, well-structured directive that maximizes AI effectiveness.
 
-Structure your output as:
+Structure your output as follows:
 
 # ENHANCED PROMPT
 
@@ -55,80 +59,12 @@ Structure your output as:
 [How to evaluate success]
 
 ## Examples (if applicable)
-[Concrete examples that demonstrate expected output]
+[Concrete examples demonstrating expected output]
 
 Make every section actionable and specific. Preserve the user's original intent while dramatically improving clarity and structure.`
   };
   
-  // Vibe Coding Tool Prompts
-  const VIBE_TOOL_PROMPTS = {
-    explainer: `You are a senior software engineer who excels at explaining code clearly.
-
-Analyze the provided code and explain:
-1. **What it does** (high-level purpose)
-2. **How it works** (step-by-step logic)
-3. **Key patterns & techniques** used
-4. **Potential improvements** or concerns
-
-Be clear, thorough, and educational. Use examples where helpful.`,
-    
-    refactor: `You are an expert code reviewer focused on clean architecture and best practices.
-
-Analyze the provided code and suggest improvements for:
-1. **Code quality** (readability, maintainability)
-2. **Performance** (efficiency, optimization opportunities)
-3. **Architecture** (structure, patterns, modularity)
-4. **Best practices** (language-specific conventions)
-5. **Security** (potential vulnerabilities)
-
-For each suggestion, explain WHY it's an improvement and show a concrete example.`,
-    
-    bugHunter: `You are a senior debugging specialist with decades of experience finding subtle bugs.
-
-Analyze the provided code for:
-1. **Logic errors** (incorrect conditions, off-by-one, etc.)
-2. **Runtime issues** (null references, type errors, async problems)
-3. **Edge cases** (boundary conditions, empty inputs, special values)
-4. **Performance problems** (memory leaks, inefficient loops)
-5. **Security vulnerabilities** (injection risks, validation gaps)
-
-For each issue found:
-- Describe the problem clearly
-- Show the problematic code
-- Explain the impact
-- Provide a fixed version`,
-    
-    docGen: `You are a technical documentation expert.
-
-Generate comprehensive documentation for the provided code:
-
-1. **Overview** - What the code does and its purpose
-2. **API/Function Documentation** - Parameters, return values, types
-3. **Usage Examples** - How to use the code with real examples
-4. **Dependencies** - Required libraries or modules
-5. **Notes** - Important considerations, limitations, or caveats
-
-Format as clean, readable Markdown. Include code examples in proper syntax-highlighted blocks.`,
-    
-    testWriter: `You are a test-driven development expert.
-
-Generate comprehensive test cases for the provided code:
-
-1. **Happy path tests** - Normal expected usage
-2. **Edge case tests** - Boundary conditions, empty inputs, max values
-3. **Error handling tests** - Invalid inputs, exceptions
-4. **Integration tests** - How it works with other components (if applicable)
-
-For each test:
-- Name/description
-- Input values
-- Expected output
-- Assertion to verify
-
-Format tests in the appropriate testing framework style (Jest, pytest, etc.) based on the language.`
-  };
-  
-  // TPEM-1.1 Configuration from Whitepaper
+  // TPEM Configuration
   const TPEM = {
     PQS_WEIGHTS: {
       clarity: 0.25,
@@ -148,37 +84,19 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       'code': { keywords: ['code', 'function', 'script', 'debug', 'refactor', 'test', 'program', 'algorithm'], icon: 'fa-code' },
       'math': { keywords: ['calculate', 'solve', 'compute', 'derive', 'proof', 'formula'], icon: 'fa-calculator' },
       'image': { keywords: ['image', 'picture', 'photo', 'visual', 'illustration', 'art'], icon: 'fa-image' }
-    },
-    
-    PRESETS: {
-      code: {
-        name: 'Code Assistant',
-        taskType: 'code',
-        template: 'Build a ${topic} that ${action}. Include tests and documentation.'
-      },
-      copy: {
-        name: 'Copywriting',
-        taskType: 'generate',
-        template: 'Write compelling ${format} for ${audience} about ${topic}. Make it ${tone}.'
-      },
-      analyze: {
-        name: 'Analysis',
-        taskType: 'analyze',
-        template: 'Analyze ${topic} and provide ${depth} insights with evidence and reasoning.'
-      }
     }
   };
   
   // Wait for DOM
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('[TigerPrompts v9.0] Initializing with LLM Agent Mode...');
+    console.log('[TigerPrompts v10] Initializing production build...');
     
     // Get elements
     const elements = {
       sendBtn: $('tp-send'),
+      voiceBtn: $('tp-voice'),
       input: $('tp-input'),
       thread: $('tp-thread'),
-      micBtn: $('tp-mic'),
       themeToggle: $('tp-theme-toggle'),
       resetBtn: $('tp-reset'),
       sidebar: $('tp-sidebar'),
@@ -189,51 +107,43 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       explainToggle: $('tp-explain-toggle'),
       pqsToggle: $('tp-pqs-toggle'),
       savedList: $('tp-saved-list'),
-      vibeCodingMode: $('tp-vibe-coding-mode'),
-      vibeContext: $('tp-vibe-context'),
+      vibeCodingToggle: $('tp-vibe-coding-toggle'),
       fileDefsInput: $('tp-file-defs'),
       ctxExisting: $('tp-ctx-existing'),
       ctxCode: $('tp-ctx-code'),
-      ctxLanguage: $('tp-ctx-language'),
       ctxTests: $('tp-ctx-tests'),
-      validateInput: $('tp-validate-input'),
-      validateBtn: $('tp-validate-btn'),
-      validateResults: $('tp-validate-results'),
-      llmAgentToggle: $('tp-llm-agent-toggle'),
-      llmSubmodes: $('tp-llm-submodes'),
-      llmLight: $('tp-llm-light'),
-      llmDeep: $('tp-llm-deep'),
-      toolExplainer: $('tp-tool-explainer'),
-      toolRefactor: $('tp-tool-refactor'),
-      toolBugHunter: $('tp-tool-bug-hunter'),
-      toolDocGen: $('tp-tool-doc-gen'),
-      toolTestWriter: $('tp-tool-test-writer'),
-      modal: $('tp-vibe-tool-modal'),
-      modalTitle: $('tp-modal-title'),
-      modalInput: $('tp-modal-input'),
-      modalSubmit: $('tp-modal-submit'),
-      modalResults: $('tp-modal-results'),
-      modalResultsContent: $('tp-modal-results-content'),
-      modalClose: $('tp-modal-close')
+      llmToggle: $('tp-llm-toggle'),
+      enhancementDepth: $('tp-enhancement-depth'),
+      autoRunToggle: $('tp-auto-run-toggle'),
+      llmSelect: $('tp-llm-select'),
+      logoWrap: $('tp-logo-wrap'),
+      vibeDrawer: $('tp-vibe-drawer'),
+      vibeDrawerToggle: $('tp-vibe-drawer-toggle'),
+      drawerClose: $('tp-drawer-close')
     };
     
     // Verify core elements
     if (!elements.sendBtn || !elements.input || !elements.thread) {
-      console.error('[TigerPrompts] Missing core elements');
+      console.error('[TigerPrompts] CRITICAL: Missing core elements');
+      alert('Tiger Prompts failed to initialize. Please check the console.');
       return;
     }
     
-    console.log('[TigerPrompts v9.0] All elements found');
+    console.log('[TigerPrompts v10] All core elements found');
     
     // State
     let state = {
-      llmAgentMode: localStorage.getItem('tp-llm-agent') !== 'false', // Default ON
-      llmEnhancementMode: localStorage.getItem('tp-llm-mode') || 'light',
+      useLLM: localStorage.getItem('tp-use-llm') !== 'false',
+      enhancementDepth: localStorage.getItem('tp-enhancement-depth') || 'light',
+      autoRun: localStorage.getItem('tp-auto-run') === 'true',
+      selectedLLM: localStorage.getItem('tp-selected-llm') || 'gpt-4o-mini',
       explainMode: localStorage.getItem('tp-explain') === 'true',
       showPQS: localStorage.getItem('tp-show-pqs') !== 'false',
       savedPrompts: JSON.parse(localStorage.getItem('tp-saved') || '[]'),
-      vibeCodingMode: localStorage.getItem('tp-vibe-coding') === 'true',
+      vibeCodingMode: localStorage.getItem('tp-vibe-coding') !== 'false',
       fileDefinitions: localStorage.getItem('tp-file-defs') || '',
+      logoHidden: false,
+      messageCount: 0,
       codeContext: {
         existingCode: '',
         language: '',
@@ -242,12 +152,52 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       }
     };
     
-    // Initialize
-    updateStatus('ready', '✅ LLM Agent Mode Ready');
+    // Initialize UI
+    updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
     loadSavedPrompts();
     updateSettingButtons();
-    updateVibeCodingUI();
-    updateLLMAgentUI();
+    
+    // Set dropdown values
+    if (elements.enhancementDepth) {
+      elements.enhancementDepth.value = state.enhancementDepth;
+    }
+    if (elements.llmSelect) {
+      elements.llmSelect.value = state.selectedLLM;
+    }
+    
+    // Set toggle states
+    const llmToggleItem = elements.llmToggle?.closest('.tp-toggle-item');
+    if (llmToggleItem && state.useLLM) {
+      llmToggleItem.classList.add('active');
+    }
+    
+    const autoRunToggleItem = elements.autoRunToggle?.closest('.tp-toggle-item');
+    if (autoRunToggleItem && state.autoRun) {
+      autoRunToggleItem.classList.add('active');
+    }
+    
+    const vibeCodingToggleItem = elements.vibeCodingToggle?.closest('.tp-toggle-item');
+    if (vibeCodingToggleItem && state.vibeCodingMode) {
+      vibeCodingToggleItem.classList.add('active');
+    }
+    
+    // Show vibe cog if vibe coding is active
+    if (state.vibeCodingMode && elements.vibeDrawerToggle) {
+      elements.vibeDrawerToggle.style.display = 'flex';
+    }
+    
+    // Update placeholder
+    if (state.vibeCodingMode) {
+      elements.input.placeholder = 'Message Tiger Prompts... (Vibe Coding Mode active)';
+    }
+    
+    // Enable dark mode by default
+    if (localStorage.getItem('tp-dark-mode') === null) {
+      document.body.classList.add('tp-dark');
+      localStorage.setItem('tp-dark-mode', 'true');
+    } else if (localStorage.getItem('tp-dark-mode') === 'true') {
+      document.body.classList.add('tp-dark');
+    }
     
     // Load file definitions
     if (elements.fileDefsInput && state.fileDefinitions) {
@@ -256,14 +206,11 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
     
     // === INPUT HANDLERS ===
     
-    // Auto-resize textarea
     elements.input.addEventListener('input', () => {
       elements.input.style.height = 'auto';
       elements.input.style.height = Math.min(elements.input.scrollHeight, 200) + 'px';
-      updateLivePQS(elements.input.value);
     });
     
-    // Handle Enter key
     elements.input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -271,19 +218,22 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       }
     });
     
-    // Send button
     elements.sendBtn.addEventListener('click', runEnhancer);
     
     // === SIDEBAR CONTROLS ===
     
     elements.toggleSidebar?.addEventListener('click', () => {
-      elements.sidebar.classList.add('collapsed');
-      elements.layout?.classList.add('collapsed');
+      if (elements.sidebar && elements.layout) {
+        elements.sidebar.classList.add('collapsed');
+        elements.layout.classList.add('collapsed');
+      }
     });
     
     elements.collapseTab?.addEventListener('click', () => {
-      elements.sidebar.classList.remove('collapsed');
-      elements.layout?.classList.remove('collapsed');
+      if (elements.sidebar && elements.layout) {
+        elements.sidebar.classList.remove('collapsed');
+        elements.layout.classList.remove('collapsed');
+      }
     });
     
     // === THEME TOGGLE ===
@@ -293,38 +243,61 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       localStorage.setItem('tp-dark-mode', document.body.classList.contains('tp-dark'));
     });
     
-    if (localStorage.getItem('tp-dark-mode') === 'true') {
-      document.body.classList.add('tp-dark');
-    }
+    // === LLM TOGGLE ===
     
-    // === LLM AGENT MODE TOGGLE ===
-    
-    elements.llmAgentToggle?.addEventListener('click', () => {
-      state.llmAgentMode = !state.llmAgentMode;
-      localStorage.setItem('tp-llm-agent', state.llmAgentMode);
-      updateLLMAgentUI();
+    elements.llmToggle?.addEventListener('click', () => {
+      state.useLLM = !state.useLLM;
+      localStorage.setItem('tp-use-llm', state.useLLM);
       
-      if (state.llmAgentMode) {
-        updateStatus('ready', '🤖 LLM Agent Mode Active');
+      const toggleItem = elements.llmToggle.closest('.tp-toggle-item');
+      if (toggleItem) {
+        toggleItem.classList.toggle('active', state.useLLM);
+      }
+      
+      updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
+    });
+    
+    // === ENHANCEMENT DEPTH ===
+    
+    elements.enhancementDepth?.addEventListener('change', (e) => {
+      state.enhancementDepth = e.target.value;
+      localStorage.setItem('tp-enhancement-depth', state.enhancementDepth);
+      
+      if (state.enhancementDepth === 'light') {
+        updateStatus('ready', '✨ Light Enhancement');
       } else {
-        updateStatus('ready', '⚙️ Local TPEM Mode Active');
+        updateStatus('ready', '🔥 Deep Enhancement');
       }
     });
     
-    // === LLM ENHANCEMENT MODE TOGGLE ===
+    // === AUTO-RUN TOGGLE ===
     
-    elements.llmLight?.addEventListener('click', () => {
-      state.llmEnhancementMode = 'light';
-      localStorage.setItem('tp-llm-mode', 'light');
-      updateLLMAgentUI();
-      updateStatus('ready', '⚡ Light Enhancement Mode');
+    elements.autoRunToggle?.addEventListener('click', () => {
+      state.autoRun = !state.autoRun;
+      localStorage.setItem('tp-auto-run', state.autoRun);
+      
+      const toggleItem = elements.autoRunToggle.closest('.tp-toggle-item');
+      if (toggleItem) {
+        toggleItem.classList.toggle('active', state.autoRun);
+      }
+      
+      updateStatus('ready', state.autoRun ? '▶️ Auto-Run Enabled' : '⏸️ Auto-Run Disabled');
     });
     
-    elements.llmDeep?.addEventListener('click', () => {
-      state.llmEnhancementMode = 'deep';
-      localStorage.setItem('tp-llm-mode', 'deep');
-      updateLLMAgentUI();
-      updateStatus('ready', '🚀 Deep Enhancement Mode');
+    // === LLM SELECT ===
+    
+    elements.llmSelect?.addEventListener('change', (e) => {
+      state.selectedLLM = e.target.value;
+      localStorage.setItem('tp-selected-llm', state.selectedLLM);
+      
+      const modelNames = {
+        'gpt-4o-mini': 'ChatGPT 4o-mini',
+        'gpt-4o': 'ChatGPT 4o',
+        'claude-sonnet': 'Claude Sonnet',
+        'copilot': 'Copilot'
+      };
+      
+      updateStatus('ready', `✅ Selected: ${modelNames[state.selectedLLM]}`);
     });
     
     // === SETTINGS ===
@@ -343,22 +316,57 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
     
     // === VIBE CODING MODE ===
     
-    elements.vibeCodingMode?.addEventListener('click', () => {
+    elements.vibeCodingToggle?.addEventListener('click', () => {
       state.vibeCodingMode = !state.vibeCodingMode;
       localStorage.setItem('tp-vibe-coding', state.vibeCodingMode);
-      updateVibeCodingUI();
       
-      if (elements.vibeContext) {
-        elements.vibeContext.style.display = state.vibeCodingMode ? 'block' : 'none';
+      const toggleItem = elements.vibeCodingToggle.closest('.tp-toggle-item');
+      if (toggleItem) {
+        toggleItem.classList.toggle('active', state.vibeCodingMode);
+      }
+      
+      // Show/hide vibe cog button
+      if (elements.vibeDrawerToggle) {
+        elements.vibeDrawerToggle.style.display = state.vibeCodingMode ? 'flex' : 'none';
       }
       
       if (state.vibeCodingMode) {
-        elements.input.placeholder = 'Enter your coding task... (Vibe Coding Mode active)';
+        elements.input.placeholder = 'Message Tiger Prompts... (Vibe Coding Mode active)';
         updateStatus('ready', '💻 Vibe Coding Mode Active');
       } else {
-        elements.input.placeholder = 'Enter your prompt... (Press Enter to enhance)';
-        updateStatus('ready', '✅ LLM Agent Mode Ready');
+        elements.input.placeholder = 'Message Tiger Prompts...';
+        updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
       }
+    });
+    
+    // === VIBE DRAWER ===
+    
+    elements.vibeDrawerToggle?.addEventListener('click', () => {
+      if (elements.vibeDrawer) {
+        elements.vibeDrawer.classList.add('open');
+      }
+    });
+    
+    elements.drawerClose?.addEventListener('click', () => {
+      if (elements.vibeDrawer) {
+        elements.vibeDrawer.classList.remove('open');
+      }
+    });
+    
+    // Close drawer on overlay click
+    const drawerOverlay = elements.vibeDrawer?.querySelector('.tp-drawer-overlay');
+    if (drawerOverlay) {
+      drawerOverlay.addEventListener('click', () => {
+        if (elements.vibeDrawer) {
+          elements.vibeDrawer.classList.remove('open');
+        }
+      });
+    }
+    
+    // === VOICE BUTTON ===
+    
+    elements.voiceBtn?.addEventListener('click', () => {
+      alert('🎤 Voice input coming soon!');
     });
     
     // === FILE DEFINITIONS ===
@@ -368,7 +376,7 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       localStorage.setItem('tp-file-defs', state.fileDefinitions);
     });
     
-    // === CODING CONTEXT HANDLERS ===
+    // === CODING CONTEXT ===
     
     elements.ctxExisting?.addEventListener('change', (e) => {
       if (elements.ctxCode) {
@@ -381,170 +389,83 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       state.codeContext.existingCode = e.target.value;
     });
     
-    elements.ctxLanguage?.addEventListener('change', (e) => {
-      const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
-      state.codeContext.language = selected.join(', ');
+    document.querySelectorAll('.tp-language-checkbox input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        const selected = Array.from(document.querySelectorAll('.tp-language-checkbox input[type="checkbox"]:checked'))
+          .map(cb => cb.value);
+        state.codeContext.language = selected.join(', ');
+      });
     });
     
     elements.ctxTests?.addEventListener('change', (e) => {
       state.codeContext.needsTesting = e.target.checked;
     });
     
-    // === VALIDATOR ===
-    
-    elements.validateBtn?.addEventListener('click', async () => {
-      const code = elements.validateInput?.value?.trim();
-      
-      if (!code) {
-        alert('Please paste some code to validate');
-        return;
-      }
-      
-      updateStatus('processing', '🔍 Validating AI Response...');
-      
-      await sleep(800);
-      
-      const validation = validateAIResponse(code);
-      displayValidationResults(validation);
-      
-      updateStatus('ready', '✅ Validation Complete');
-    });
-    
-    // === VIBE CODING TOOLS ===
-    
-    const vibeTools = {
-      explainer: { name: 'Code Explainer', icon: '🔍', prompt: VIBE_TOOL_PROMPTS.explainer, action: 'Explain Code' },
-      refactor: { name: 'Refactor Advisor', icon: '🔧', prompt: VIBE_TOOL_PROMPTS.refactor, action: 'Analyze & Suggest' },
-      bugHunter: { name: 'Bug Hunter', icon: '🐛', prompt: VIBE_TOOL_PROMPTS.bugHunter, action: 'Find Bugs' },
-      docGen: { name: 'Doc Generator', icon: '📝', prompt: VIBE_TOOL_PROMPTS.docGen, action: 'Generate Docs' },
-      testWriter: { name: 'Test Writer', icon: '🧪', prompt: VIBE_TOOL_PROMPTS.testWriter, action: 'Write Tests' }
-    };
-    
-    elements.toolExplainer?.addEventListener('click', () => openVibeTool('explainer'));
-    elements.toolRefactor?.addEventListener('click', () => openVibeTool('refactor'));
-    elements.toolBugHunter?.addEventListener('click', () => openVibeTool('bugHunter'));
-    elements.toolDocGen?.addEventListener('click', () => openVibeTool('docGen'));
-    elements.toolTestWriter?.addEventListener('click', () => openVibeTool('testWriter'));
-    
-    let currentTool = null;
-    
-    function openVibeTool(toolId) {
-      currentTool = toolId;
-      const tool = vibeTools[toolId];
-      
-      elements.modalTitle.textContent = tool.name;
-      elements.modalInput.value = '';
-      elements.modalInput.placeholder = 'Paste your code here...';
-      elements.modalSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> ${tool.action}`;
-      elements.modalResults.style.display = 'none';
-      
-      elements.modal.style.display = 'flex';
-      setTimeout(() => elements.modalInput.focus(), 100);
-    }
-    
-    elements.modalClose?.addEventListener('click', () => {
-      elements.modal.style.display = 'none';
-    });
-    
-    elements.modal?.addEventListener('click', (e) => {
-      if (e.target === elements.modal) {
-        elements.modal.style.display = 'none';
-      }
-    });
-    
-    elements.modalSubmit?.addEventListener('click', async () => {
-      const code = elements.modalInput.value.trim();
-      
-      if (!code) {
-        alert('Please paste some code first');
-        return;
-      }
-      
-      const tool = vibeTools[currentTool];
-      
-      elements.modalSubmit.disabled = true;
-      elements.modalSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
-      
-      try {
-        const result = await callOpenAI(tool.prompt, code);
-        
-        elements.modalResults.style.display = 'block';
-        elements.modalResultsContent.innerHTML = `<pre>${escapeHtml(result)}</pre>`;
-        elements.modalResults.scrollIntoView({ behavior: 'smooth' });
-        
-      } catch (error) {
-        alert('Error: ' + error.message);
-      } finally {
-        elements.modalSubmit.disabled = false;
-        elements.modalSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> ${tool.action}`;
-      }
-    });
-    
-    // === PRESETS ===
-    
-    document.querySelectorAll('.tp-preset-item').forEach(preset => {
-      preset.addEventListener('click', () => {
-        const presetId = preset.dataset.preset;
-        const presetData = TPEM.PRESETS[presetId];
-        if (presetData) {
-          elements.input.value = presetData.template;
-          elements.input.focus();
-        }
-      });
-    });
-    
     // === RESET ===
     
     elements.resetBtn?.addEventListener('click', () => {
-      if (elements.thread.children.length > 0) {
-        if (confirm('Clear all enhanced prompts?')) {
+      if (elements.thread && elements.thread.children.length > 0) {
+        if (confirm('Clear all messages?')) {
           elements.thread.innerHTML = '';
-          elements.input.value = '';
-          elements.input.style.height = 'auto';
-          updateStatus('ready', '✅ LLM Agent Mode Ready');
+          if (elements.input) {
+            elements.input.value = '';
+            elements.input.style.height = 'auto';
+          }
+          state.messageCount = 0;
+          state.logoHidden = false;
+          if (elements.logoWrap) {
+            elements.logoWrap.classList.remove('hidden');
+          }
+          updateStatus('ready', state.useLLM ? '🤖 LLM Mode Active' : '⚡ Local Mode Active');
         }
       }
-    });
-    
-    // === MICROPHONE ===
-    
-    elements.micBtn?.addEventListener('click', () => {
-      alert('🎤 Voice input coming soon!');
     });
     
     // === MAIN ENHANCEMENT LOGIC ===
     
     async function runEnhancer() {
-      const prompt = elements.input.value.trim();
+      const prompt = elements.input?.value?.trim();
       
       if (!prompt) {
-        elements.input.focus();
+        elements.input?.focus();
         return;
       }
       
-      const isLLM = state.llmAgentMode;
+      const mode = state.useLLM ? 'LLM' : 'Local';
+      const depth = state.enhancementDepth === 'light' ? 'Light' : 'Deep';
       
-      updateStatus('processing', isLLM 
-        ? `🤖 ${state.llmEnhancementMode === 'light' ? 'Light' : 'Deep'} Enhancement via OpenAI...` 
-        : '⚙️ Running Local TPEM Pipeline...');
+      updateStatus('processing', `${mode === 'LLM' ? '🤖' : '⚡'} ${depth} Enhancement...`);
       
       const msgContainer = createMessageContainer();
-      elements.thread.appendChild(msgContainer);
+      if (elements.thread) {
+        elements.thread.appendChild(msgContainer);
+      }
+      
+      // Hide logo after first message
+      state.messageCount++;
+      if (state.messageCount === 1 && !state.logoHidden && elements.logoWrap) {
+        elements.logoWrap.classList.add('hidden');
+        state.logoHidden = true;
+      }
       
       const originalPrompt = prompt;
-      elements.input.value = '';
-      elements.input.style.height = 'auto';
-      elements.input.focus();
+      if (elements.input) {
+        elements.input.value = '';
+        elements.input.style.height = 'auto';
+        elements.input.focus();
+      }
       
       scrollToBottom();
       
       // Show thinking animation
       const content = msgContainer.querySelector('.tp-msg-content');
-      content.innerHTML = '<div class="tp-thinking">Thinking<span class="tp-thinking-dots"></span></div>';
+      if (content) {
+        content.innerHTML = '<div class="tp-thinking">Thinking<span class="tp-thinking-dots"></span></div>';
+      }
       
       let dotCount = 0;
       const dotsInterval = setInterval(() => {
-        const dotsEl = content.querySelector('.tp-thinking-dots');
+        const dotsEl = content?.querySelector('.tp-thinking-dots');
         if (dotsEl) {
           dotCount = (dotCount + 1) % 4;
           dotsEl.textContent = '.'.repeat(dotCount);
@@ -557,36 +478,174 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       let result;
       
       try {
-        if (isLLM) {
-          // LLM Agent Mode
+        if (state.useLLM) {
           result = await enhanceWithLLM(originalPrompt);
         } else {
-          // Local TPEM Mode
           result = await enhancePromptTPEM(originalPrompt);
         }
         
         updateMessage(msgContainer, result);
         updateStatus('ready', '✅ Enhancement Complete');
         
+        // Auto-run if enabled
+        if (state.autoRun && state.useLLM) {
+          // Add processing indicator
+          const processingSection = document.createElement('div');
+          processingSection.className = 'tp-llm-processing';
+          processingSection.innerHTML = `
+            <div class="tp-llm-processing-spinner">
+              <i class="fa-solid fa-spinner"></i>
+              <span>Running enhanced prompt through ${state.selectedLLM}...</span>
+            </div>
+          `;
+          
+          const footer = msgContainer.querySelector('.tp-msg-footer');
+          if (footer) {
+            footer.parentNode.insertBefore(processingSection, footer);
+          } else {
+            msgContainer.appendChild(processingSection);
+          }
+          
+          scrollToBottom();
+          
+          // Execute the prompt
+          await runEnhancedPrompt(msgContainer, result.enhanced, processingSection);
+        }
+        
       } catch (error) {
         console.error('Enhancement error:', error);
-        content.innerHTML = `<div class="tp-error">❌ Error: ${error.message}</div>`;
+        if (content) {
+          content.innerHTML = `<div class="tp-error">❌ Error: ${error.message}</div>`;
+        }
         updateStatus('ready', '❌ Enhancement Failed');
       }
       
       scrollToBottom();
     }
     
+    // === RUN ENHANCED PROMPT (NEW FEATURE) ===
+    
+    async function runEnhancedPrompt(msgContainer, enhancedPrompt, processingSection = null) {
+      const runBtn = msgContainer.querySelector('.tp-run-btn');
+      
+      if (runBtn) {
+        runBtn.disabled = true;
+        runBtn.classList.add('running');
+        runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running...';
+      }
+      
+      // If no processing section exists (manual run), create one
+      if (!processingSection) {
+        processingSection = document.createElement('div');
+        processingSection.className = 'tp-llm-processing';
+        processingSection.innerHTML = `
+          <div class="tp-llm-processing-spinner">
+            <i class="fa-solid fa-spinner"></i>
+            <span>Running enhanced prompt through ${state.selectedLLM}...</span>
+          </div>
+        `;
+        
+        const footer = msgContainer.querySelector('.tp-msg-footer');
+        if (footer) {
+          footer.parentNode.insertBefore(processingSection, footer);
+        } else {
+          msgContainer.appendChild(processingSection);
+        }
+        
+        scrollToBottom();
+      }
+      
+      updateStatus('processing', '🤖 Running enhanced prompt...');
+      
+      try {
+        // Call LLM with enhanced prompt
+        const response = await callOpenAI(
+          'You are a helpful AI assistant. Respond naturally and helpfully to the user\'s request.',
+          enhancedPrompt
+        );
+        
+        // Remove processing indicator
+        if (processingSection && processingSection.parentNode) {
+          processingSection.parentNode.removeChild(processingSection);
+        }
+        
+        // Add LLM response section to message card
+        const llmResponseSection = document.createElement('div');
+        llmResponseSection.className = 'tp-llm-response';
+        llmResponseSection.innerHTML = `
+          <div class="tp-llm-response-header">
+            <div class="tp-llm-response-title">
+              <i class="fa-solid fa-robot"></i>
+              <span>LLM Response (${state.selectedLLM})</span>
+            </div>
+            <button class="tp-llm-response-copy">
+              <i class="fa-solid fa-copy"></i>
+              Copy Response
+            </button>
+          </div>
+          <div class="tp-llm-response-content">${escapeHtml(response)}</div>
+        `;
+        
+        const footer = msgContainer.querySelector('.tp-msg-footer');
+        if (footer) {
+          footer.parentNode.insertBefore(llmResponseSection, footer);
+        } else {
+          msgContainer.appendChild(llmResponseSection);
+        }
+        
+        // Add copy functionality
+        const copyBtn = llmResponseSection.querySelector('.tp-llm-response-copy');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(response).then(() => {
+              copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+              copyBtn.classList.add('copied');
+              setTimeout(() => {
+                copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy Response';
+                copyBtn.classList.remove('copied');
+              }, 2000);
+            });
+          });
+        }
+        
+        if (runBtn) {
+          runBtn.disabled = false;
+          runBtn.classList.remove('running');
+          runBtn.classList.add('complete');
+          runBtn.innerHTML = '<i class="fa-solid fa-check"></i> Response Generated ✓';
+        }
+        
+        updateStatus('ready', '✅ Execution Complete');
+        scrollToBottom();
+        
+      } catch (error) {
+        console.error('Run error:', error);
+        
+        // Remove processing indicator on error
+        if (processingSection && processingSection.parentNode) {
+          processingSection.parentNode.removeChild(processingSection);
+        }
+        
+        if (runBtn) {
+          runBtn.disabled = false;
+          runBtn.classList.remove('running');
+          runBtn.innerHTML = '<i class="fa-solid fa-play"></i> Run This Prompt';
+        }
+        
+        alert('Error running prompt: ' + error.message);
+        updateStatus('ready', '❌ Execution Failed');
+      }
+    }
+    
     // === LLM ENHANCEMENT ===
     
     async function enhanceWithLLM(rawPrompt) {
-      const systemPrompt = state.llmEnhancementMode === 'light' 
+      const systemPrompt = state.enhancementDepth === 'light' 
         ? LLM_PROMPTS.light 
         : LLM_PROMPTS.deep;
       
       let userPrompt = rawPrompt;
       
-      // If Vibe Coding Mode is active, add context
       if (state.vibeCodingMode) {
         userPrompt = buildVibeCodingPrompt(rawPrompt);
       }
@@ -605,7 +664,7 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
         pqsAfter,
         deltaQ: pqsAfter - pqsBefore,
         explanation: state.explainMode ? generateLLMExplanation(rawPrompt, enhanced) : null,
-        mode: 'llm-' + state.llmEnhancementMode
+        mode: 'llm-' + state.enhancementDepth
       };
     }
     
@@ -643,9 +702,7 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
     function generateLLMExplanation(original, enhanced) {
       const changes = [];
       
-      if (state.llmAgentMode) {
-        changes.push(`<strong>🤖 LLM Agent Mode:</strong> Enhanced via OpenAI ${state.llmEnhancementMode === 'light' ? '(Light)' : '(Deep)'}`);
-      }
+      changes.push(`<strong>🤖 LLM Mode:</strong> Enhanced via OpenAI (${state.enhancementDepth})`);
       
       if (state.vibeCodingMode) {
         changes.push(`<strong>💻 Vibe Coding Mode:</strong> Applied coding-specific optimizations`);
@@ -661,27 +718,25 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       return changes;
     }
     
-    async function callOpenAI(systemPrompt, userPrompt) {
-      const response = await fetch(OPENAI_CONFIG.endpoint, {
+    async function callOpenAI(systemPrompt, userPrompt, model = null) {
+      const selectedModel = model || state.selectedLLM || 'gpt-4o-mini';
+      
+      const response = await fetch(WORKER_CONFIG.endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_CONFIG.apiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: OPENAI_CONFIG.model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.7,
-          max_tokens: 2000
+          systemPrompt: systemPrompt,
+          userPrompt: userPrompt,
+          model: selectedModel,
+          maxTokens: 2000
         })
       });
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error?.message || 'OpenAI API request failed');
+        throw new Error(error.error?.message || 'API request failed');
       }
       
       const data = await response.json();
@@ -691,12 +746,17 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
     // === LOCAL TPEM PIPELINE ===
     
     async function enhancePromptTPEM(rawPrompt) {
-      console.log('[TPEM-1.1] Starting local enhancement pipeline...');
+      console.log('[TPEM] Starting local enhancement...');
       
       const taskType = classifyTask(rawPrompt);
       const ambiguityScore = calculateAmbiguity(rawPrompt);
-      const scaffold = buildScaffold(rawPrompt, taskType, ambiguityScore);
-      const enhanced = synthesizeContext(scaffold, taskType, rawPrompt);
+      
+      let enhanced;
+      if (state.enhancementDepth === 'light') {
+        enhanced = synthesizeContextLight(rawPrompt, taskType, ambiguityScore);
+      } else {
+        enhanced = synthesizeContextDeep(rawPrompt, taskType, ambiguityScore);
+      }
       
       const pqsBefore = calculatePQS(rawPrompt);
       const pqsAfter = calculatePQS(enhanced);
@@ -714,60 +774,29 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
         pqsAfter,
         deltaQ: pqsAfter - pqsBefore,
         explanation,
-        mode: 'local-tpem'
+        mode: 'local-' + state.enhancementDepth
       };
     }
     
-    function classifyTask(prompt) {
-      const lower = prompt.toLowerCase();
-      let maxScore = 0;
-      let detectedType = 'generate';
+    function synthesizeContextLight(prompt, taskType, ambiguity) {
+      const sections = [];
+      sections.push(getRoleForTask(taskType));
+      sections.push('');
+      sections.push(prompt);
       
-      for (const [type, config] of Object.entries(TPEM.TASK_TYPES)) {
-        let score = 0;
-        for (const keyword of config.keywords) {
-          if (lower.includes(keyword)) {
-            score += 1;
-          }
-        }
-        if (score > maxScore) {
-          maxScore = score;
-          detectedType = type;
-        }
+      if (ambiguity > 0.5) {
+        sections.push('');
+        sections.push('Key requirements:');
+        sections.push(...getConstraintsForTask(taskType).slice(0, 2));
       }
       
-      return detectedType;
+      return sections.join('\n');
     }
     
-    function calculateAmbiguity(prompt) {
-      let score = 0;
-      const lower = prompt.toLowerCase();
-      
-      if (!/(for|to|audience|users|readers|customers|people|team)/.test(lower)) score += 0.1;
-      if (!/(format|structure|json|markdown|list|table|style|output)/.test(lower)) score += 0.1;
-      if (/(improve|better|optimize|enhance|fix|good)/.test(lower) && !/\d+/.test(prompt)) score += 0.2;
-      if (!/(must|should|tone|style|length|words|characters|require|need)/.test(lower)) score += 0.1;
-      if (prompt.split(' ').length < 5) score += 0.15;
-      if (!/(about|regarding|for|on|with|using|that|which)/.test(lower)) score += 0.15;
-      
-      return Math.min(score, 1);
-    }
-    
-    function buildScaffold(prompt, taskType, ambiguity) {
-      return {
-        prompt,
-        taskType,
-        ambiguity,
-        needsAssumptions: ambiguity > 0.35,
-        needsExamples: ambiguity > 0.5,
-        needsVerification: taskType === 'code' || taskType === 'math' || taskType === 'extract'
-      };
-    }
-    
-    function synthesizeContext(scaffold, taskType, rawPrompt) {
+    function synthesizeContextDeep(prompt, taskType, ambiguity) {
       const sections = [];
       
-      sections.push('# ENHANCED PROMPT (TPEM-1.1)');
+      sections.push('# ENHANCED PROMPT (TPEM)');
       if (state.vibeCodingMode) {
         sections.push('**💻 VIBE CODING MODE ACTIVE**');
       }
@@ -778,7 +807,7 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       sections.push('');
       
       sections.push('## Task');
-      sections.push(scaffold.prompt);
+      sections.push(prompt);
       sections.push('');
       
       if (state.fileDefinitions.trim() && state.vibeCodingMode) {
@@ -818,6 +847,41 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       sections.push('- Self-check for errors before finalizing');
       
       return sections.join('\n');
+    }
+    
+    function classifyTask(prompt) {
+      const lower = prompt.toLowerCase();
+      let maxScore = 0;
+      let detectedType = 'generate';
+      
+      for (const [type, config] of Object.entries(TPEM.TASK_TYPES)) {
+        let score = 0;
+        for (const keyword of config.keywords) {
+          if (lower.includes(keyword)) {
+            score += 1;
+          }
+        }
+        if (score > maxScore) {
+          maxScore = score;
+          detectedType = type;
+        }
+      }
+      
+      return detectedType;
+    }
+    
+    function calculateAmbiguity(prompt) {
+      let score = 0;
+      const lower = prompt.toLowerCase();
+      
+      if (!/(for|to|audience|users|readers|customers|people|team)/.test(lower)) score += 0.1;
+      if (!/(format|structure|json|markdown|list|table|style|output)/.test(lower)) score += 0.1;
+      if (/(improve|better|optimize|enhance|fix|good)/.test(lower) && !/\d+/.test(prompt)) score += 0.2;
+      if (!/(must|should|tone|style|length|words|characters|require|need)/.test(lower)) score += 0.1;
+      if (prompt.split(' ').length < 5) score += 0.15;
+      if (!/(about|regarding|for|on|with|using|that|which)/.test(lower)) score += 0.15;
+      
+      return Math.min(score, 1);
     }
     
     function getRoleForTask(type) {
@@ -881,6 +945,8 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
     
     function generateExplanation(original, enhanced, taskType, ambiguity, pqsBefore, pqsAfter) {
       const changes = [];
+      
+      changes.push(`<strong>⚡ Local Mode:</strong> Enhanced via TPEM (${state.enhancementDepth})`);
       
       if (state.vibeCodingMode) {
         changes.push(`<strong>💻 Vibe Coding Mode:</strong> Applied coding-specific constraints`);
@@ -961,173 +1027,20 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       return 0.3;
     }
     
-    // === VALIDATOR ===
-    
-    function validateAIResponse(code) {
-      const issues = [];
-      
-      const truncationPatterns = [
-        { pattern: /\/\/\s*\.\.\./, message: 'Ellipsis placeholder found' },
-        { pattern: /\/\/\s*rest of/i, message: 'Truncation comment found' },
-        { pattern: /\/\/\s*continued/i, message: 'Continuation placeholder found' },
-        { pattern: /\/\/\s*same as (above|before)/i, message: 'Reference to previous code' }
-      ];
-      
-      truncationPatterns.forEach(({ pattern, message }) => {
-        if (pattern.test(code)) {
-          const match = code.match(pattern);
-          const lineNumber = code.substring(0, match.index).split('\n').length;
-          issues.push({
-            type: 'CRITICAL',
-            category: 'Truncation',
-            problem: `${message} at line ${lineNumber}`,
-            fix: 'Ask AI: "Please provide the complete code without any truncation or placeholders."'
-          });
-        }
-      });
-      
-      if (/\b(useState|useEffect|useContext)\b/.test(code) && 
-          !/import\s+.*\s+from\s+['"]react['"]/.test(code)) {
-        issues.push({
-          type: 'CRITICAL',
-          category: 'Imports',
-          problem: 'React hooks used but React import is missing',
-          fix: 'Add: import { useState, useEffect } from "react" at the top'
-        });
-      }
-      
-      const hasAsyncCode = /async\s+function|\.then\(|await\s/.test(code);
-      const hasErrorHandling = /try\s*{|\.catch\(|catch\s*\(/i.test(code);
-      
-      if (hasAsyncCode && !hasErrorHandling) {
-        issues.push({
-          type: 'WARNING',
-          category: 'Error Handling',
-          problem: 'Async code detected but no error handling found',
-          fix: 'Add try/catch blocks or .catch() handlers'
-        });
-      }
-      
-      const criticalCount = issues.filter(i => i.type === 'CRITICAL').length;
-      const warningCount = issues.filter(i => i.type === 'WARNING').length;
-      const score = Math.max(0, 100 - (criticalCount * 30) - (warningCount * 10));
-      
-      return {
-        passed: criticalCount === 0,
-        score,
-        issues,
-        summary: {
-          critical: criticalCount,
-          warnings: warningCount,
-          total: issues.length
-        }
-      };
-    }
-    
-    function displayValidationResults(validation) {
-      const results = elements.validateResults;
-      if (!results) return;
-      
-      results.style.display = 'block';
-      
-      const scoreColor = validation.score >= 80 ? '#22c55e' : 
-                        validation.score >= 50 ? '#f59e0b' : '#ef4444';
-      
-      let html = `
-        <div class="tp-validate-header">
-          <div class="tp-validate-score" style="color: ${scoreColor}">
-            <i class="fa-solid fa-gauge-high"></i>
-            Quality Score: ${validation.score}/100
-          </div>
-          <div class="tp-validate-summary">
-            <span class="tp-validate-badge critical">${validation.summary.critical} Critical</span>
-            <span class="tp-validate-badge warning">${validation.summary.warnings} Warnings</span>
-          </div>
-        </div>
-      `;
-      
-      if (validation.issues.length === 0) {
-        html += `
-          <div class="tp-validate-success">
-            <i class="fa-solid fa-circle-check"></i>
-            <div>
-              <strong>Excellent!</strong>
-              <p>No major issues detected. Code looks good!</p>
-            </div>
-          </div>
-        `;
-      } else {
-        html += '<div class="tp-validate-issues">';
-        
-        const critical = validation.issues.filter(i => i.type === 'CRITICAL');
-        const warnings = validation.issues.filter(i => i.type === 'WARNING');
-        
-        if (critical.length > 0) {
-          html += '<div class="tp-validate-section critical">';
-          html += '<h4><i class="fa-solid fa-circle-xmark"></i> Critical Issues</h4>';
-          critical.forEach(issue => {
-            html += `
-              <div class="tp-validate-issue">
-                <div class="tp-validate-issue-header">
-                  <strong>${issue.category}</strong>
-                </div>
-                <div class="tp-validate-issue-problem">${issue.problem}</div>
-                <div class="tp-validate-issue-fix">💡 ${issue.fix}</div>
-              </div>
-            `;
-          });
-          html += '</div>';
-        }
-        
-        if (warnings.length > 0) {
-          html += '<div class="tp-validate-section warning">';
-          html += '<h4><i class="fa-solid fa-triangle-exclamation"></i> Warnings</h4>';
-          warnings.forEach(issue => {
-            html += `
-              <div class="tp-validate-issue">
-                <div class="tp-validate-issue-header">
-                  <strong>${issue.category}</strong>
-                </div>
-                <div class="tp-validate-issue-problem">${issue.problem}</div>
-                <div class="tp-validate-issue-fix">💡 ${issue.fix}</div>
-              </div>
-            `;
-          });
-          html += '</div>';
-        }
-        
-        html += '</div>';
-      }
-      
-      results.innerHTML = html;
-      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-    
-    function updateLivePQS(prompt) {
-      const livePQS = $('tp-live-pqs');
-      if (!livePQS || !prompt) return;
-      
-      const score = calculatePQS(prompt);
-      livePQS.textContent = `PQS: ${score.toFixed(2)}`;
-      
-      livePQS.className = 'tp-live-pqs ' + 
-        (score < 0.5 ? 'pqs-low' : 
-         score < 0.7 ? 'pqs-medium' : 
-         'pqs-high');
-      
-      livePQS.style.display = 'block';
-    }
-    
     // === UI HELPERS ===
     
     function createMessageContainer() {
       const container = document.createElement('div');
       container.className = 'tp-msg';
+      
+      // Show run button only if auto-run is OFF and LLM mode is ON
+      const showRunBtn = !state.autoRun && state.useLLM;
+      
       container.innerHTML = `
         <div class="tp-msg-header">
           <div class="tp-msg-label">
             <i class="fa-solid fa-sparkles"></i>
-            Enhanced by ${state.llmAgentMode ? 'OpenAI' : 'TPEM'}
+            Enhanced by ${state.useLLM ? 'OpenAI' : 'TPEM'} (${state.enhancementDepth})
           </div>
           <div class="tp-msg-actions">
             <button class="tp-copy-btn">
@@ -1138,6 +1051,12 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
               <i class="fa-solid fa-bookmark"></i>
               Save
             </button>
+            ${showRunBtn ? `
+            <button class="tp-run-btn">
+              <i class="fa-solid fa-play"></i>
+              Run This Prompt
+            </button>
+            ` : ''}
           </div>
         </div>
         <div class="tp-msg-content">Processing...</div>
@@ -1160,15 +1079,17 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       const pqsScore = container.querySelector('.tp-pqs-score');
       const meta = container.querySelector('.tp-msg-meta');
       
-      content.textContent = result.enhanced;
+      if (content) {
+        content.textContent = result.enhanced;
+      }
       
-      if (state.showPQS) {
+      if (state.showPQS && footer && pqsScore && meta) {
         footer.style.display = 'flex';
         pqsScore.textContent = `${result.pqsAfter.toFixed(2)} (+${result.deltaQ.toFixed(2)})`;
         meta.textContent = `${result.taskType.toUpperCase()} · ${result.mode.toUpperCase()}`;
       }
       
-      if (result.explanation) {
+      if (result.explanation && content) {
         const explDiv = document.createElement('div');
         explDiv.className = 'tp-explanation';
         explDiv.innerHTML = `
@@ -1178,29 +1099,43 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
           </div>
           ${result.explanation.map(item => `<div class="tp-explanation-item">${item}</div>`).join('')}
         `;
-        content.parentNode.insertBefore(explDiv, footer);
+        if (content.parentNode && footer) {
+          content.parentNode.insertBefore(explDiv, footer);
+        }
       }
       
       const copyBtn = container.querySelector('.tp-copy-btn');
-      copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(result.enhanced).then(() => {
-          copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-          copyBtn.classList.add('copied');
-          setTimeout(() => {
-            copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy';
-            copyBtn.classList.remove('copied');
-          }, 2000);
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(result.enhanced).then(() => {
+            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            copyBtn.classList.add('copied');
+            setTimeout(() => {
+              copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy';
+              copyBtn.classList.remove('copied');
+            }, 2000);
+          });
         });
-      });
+      }
       
       const saveBtn = container.querySelector('.tp-save-btn');
-      saveBtn.addEventListener('click', () => {
-        savePrompt(result.enhanced, result.original);
-        saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
-        setTimeout(() => {
-          saveBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Save';
-        }, 2000);
-      });
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+          savePrompt(result.enhanced, result.original);
+          saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+          setTimeout(() => {
+            saveBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Save';
+          }, 2000);
+        });
+      }
+      
+      // Run button handler
+      const runBtn = container.querySelector('.tp-run-btn');
+      if (runBtn) {
+        runBtn.addEventListener('click', () => {
+          runEnhancedPrompt(container, result.enhanced);
+        });
+      }
     }
     
     function savePrompt(enhanced, original) {
@@ -1252,7 +1187,7 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
     
     function loadPrompt(id) {
       const prompt = state.savedPrompts.find(p => p.id === id);
-      if (prompt) {
+      if (prompt && elements.input) {
         elements.input.value = prompt.enhanced;
         elements.input.focus();
       }
@@ -1265,26 +1200,12 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
     }
     
     function updateSettingButtons() {
-      elements.explainToggle?.classList.toggle('active', state.explainMode);
-      elements.pqsToggle?.classList.toggle('active', state.showPQS);
-    }
-    
-    function updateVibeCodingUI() {
-      elements.vibeCodingMode?.classList.toggle('active', state.vibeCodingMode);
-      if (elements.vibeContext) {
-        elements.vibeContext.style.display = state.vibeCodingMode ? 'block' : 'none';
+      if (elements.explainToggle) {
+        elements.explainToggle.classList.toggle('active', state.explainMode);
       }
-    }
-    
-    function updateLLMAgentUI() {
-      elements.llmAgentToggle?.classList.toggle('active', state.llmAgentMode);
-      
-      if (elements.llmSubmodes) {
-        elements.llmSubmodes.style.display = state.llmAgentMode ? 'flex' : 'none';
+      if (elements.pqsToggle) {
+        elements.pqsToggle.classList.toggle('active', state.showPQS);
       }
-      
-      elements.llmLight?.classList.toggle('active', state.llmEnhancementMode === 'light');
-      elements.llmDeep?.classList.toggle('active', state.llmEnhancementMode === 'deep');
     }
     
     function updateStatus(statusType, text) {
@@ -1296,10 +1217,9 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
     
     function scrollToBottom() {
       setTimeout(() => {
-        elements.thread.lastElementChild?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'nearest' 
-        });
+        if (elements.thread) {
+          elements.thread.scrollTop = elements.thread.scrollHeight;
+        }
       }, 100);
     }
     
@@ -1309,6 +1229,6 @@ Format tests in the appropriate testing framework style (Jest, pytest, etc.) bas
       return div.innerHTML;
     }
     
-    console.log('[TigerPrompts v9.0] Initialization complete ✓');
+    console.log('[TigerPrompts v10] Initialization complete ✓');
   });
 })();
